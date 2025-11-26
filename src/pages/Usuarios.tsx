@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,34 +12,96 @@ import {
 } from "@/components/ui/table";
 import { Plus, Search, Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+
+type UserWithRole = {
+  id: string;
+  username: string;
+  email: string;
+  role: string;
+};
 
 const Usuarios = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [users, setUsers] = useState<UserWithRole[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
-  const users = [
-    { id: 1, name: "Admin Sistema", email: "admin@estokar.com", role: "Administrador", status: "Ativo" },
-    { id: 2, name: "João Silva", email: "joao@estokar.com", role: "Gerente", status: "Ativo" },
-    { id: 3, name: "Maria Santos", email: "maria@estokar.com", role: "Operador", status: "Ativo" },
-    { id: 4, name: "Pedro Costa", email: "pedro@estokar.com", role: "Operador", status: "Ativo" },
-    { id: 5, name: "Ana Oliveira", email: "ana@estokar.com", role: "Consultor", status: "Inativo" },
-  ];
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      
+      // Get all users from auth.users via profiles
+      const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
+      
+      if (authError) throw authError;
+
+      // Get profiles and roles
+      const { data: profiles, error: profilesError } = await supabase
+        .from("profiles")
+        .select(`
+          id,
+          username,
+          user_roles (role)
+        `);
+
+      if (profilesError) throw profilesError;
+
+      const usersWithRoles: UserWithRole[] = authUsers.users.map((authUser) => {
+        const profile = profiles?.find((p) => p.id === authUser.id);
+        const role = profile?.user_roles?.[0]?.role || "operador";
+        
+        return {
+          id: authUser.id,
+          username: profile?.username || "Sem username",
+          email: authUser.email || "Sem email",
+          role: role,
+        };
+      });
+
+      setUsers(usersWithRoles);
+    } catch (error: any) {
+      toast({
+        title: "Erro ao carregar usuários",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredUsers = users.filter((user) =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getRoleBadgeClass = (role: string) => {
     switch (role) {
-      case "Administrador":
+      case "admin":
         return "bg-destructive text-destructive-foreground";
-      case "Gerente":
+      case "gerente":
         return "bg-primary text-primary-foreground";
-      case "Operador":
+      case "operador":
         return "bg-accent text-accent-foreground";
       default:
         return "bg-muted text-muted-foreground";
     }
+  };
+
+  const getRoleLabel = (role: string) => {
+    const labels: Record<string, string> = {
+      admin: "Administrador",
+      gerente: "Gerente",
+      operador: "Operador",
+      consultor: "Consultor",
+    };
+    return labels[role] || role;
   };
 
   return (
@@ -76,51 +138,58 @@ const Usuarios = () => {
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/50">
-                  <TableHead>Nome</TableHead>
+                  <TableHead>Username</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Perfil</TableHead>
-                  <TableHead>Status</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredUsers.map((user) => (
-                  <TableRow key={user.id} className="hover:bg-muted/30">
-                    <TableCell className="font-medium">{user.name}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>
-                      <Badge className={getRoleBadgeClass(user.role)}>
-                        {user.role}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={user.status === "Ativo" ? "default" : "secondary"}
-                        className={user.status === "Ativo" ? "bg-primary text-primary-foreground" : ""}
-                      >
-                        {user.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-primary hover:bg-primary/10"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-8">
+                      <div className="flex justify-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : filteredUsers.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                      Nenhum usuário encontrado
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredUsers.map((user) => (
+                    <TableRow key={user.id} className="hover:bg-muted/30">
+                      <TableCell className="font-medium">{user.username}</TableCell>
+                      <TableCell>{user.email}</TableCell>
+                      <TableCell>
+                        <Badge className={getRoleBadgeClass(user.role)}>
+                          {getRoleLabel(user.role)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-primary hover:bg-primary/10"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>

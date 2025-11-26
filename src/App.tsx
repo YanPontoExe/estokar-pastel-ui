@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Layout } from "@/components/Layout";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import Materiais from "./pages/Materiais";
 import NovoMaterial from "./pages/NovoMaterial";
@@ -13,6 +14,7 @@ import Marcas from "./pages/Marcas";
 import Entradas from "./pages/Entradas";
 import Saidas from "./pages/Saidas";
 import Setores from "./pages/Setores";
+import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,15 +26,16 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Layout><Dashboard /></Layout>} />
-          <Route path="/materiais" element={<Layout><Materiais /></Layout>} />
-          <Route path="/materiais/novo" element={<Layout><NovoMaterial /></Layout>} />
-          <Route path="/funcionarios" element={<Layout><Funcionarios /></Layout>} />
-          <Route path="/usuarios" element={<Layout><Usuarios /></Layout>} />
-          <Route path="/marcas" element={<Layout><Marcas /></Layout>} />
-          <Route path="/entradas" element={<Layout><Entradas /></Layout>} />
-          <Route path="/saidas" element={<Layout><Saidas /></Layout>} />
-          <Route path="/setores" element={<Layout><Setores /></Layout>} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/" element={<ProtectedRoute><Layout><Dashboard /></Layout></ProtectedRoute>} />
+          <Route path="/materiais" element={<ProtectedRoute><Layout><Materiais /></Layout></ProtectedRoute>} />
+          <Route path="/materiais/novo" element={<ProtectedRoute><Layout><NovoMaterial /></Layout></ProtectedRoute>} />
+          <Route path="/funcionarios" element={<ProtectedRoute><Layout><Funcionarios /></Layout></ProtectedRoute>} />
+          <Route path="/usuarios" element={<ProtectedRoute><Layout><Usuarios /></Layout></ProtectedRoute>} />
+          <Route path="/marcas" element={<ProtectedRoute><Layout><Marcas /></Layout></ProtectedRoute>} />
+          <Route path="/entradas" element={<ProtectedRoute><Layout><Entradas /></Layout></ProtectedRoute>} />
+          <Route path="/saidas" element={<ProtectedRoute><Layout><Saidas /></Layout></ProtectedRoute>} />
+          <Route path="/setores" element={<ProtectedRoute><Layout><Setores /></Layout></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
