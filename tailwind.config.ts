@@ -57,6 +57,15 @@ export default {
           border: "hsl(var(--sidebar-border))",
           ring: "hsl(var(--sidebar-ring))",
         },
+        "pastel-blue": {
+          light: "hsl(var(--pastel-blue-light))",
+          DEFAULT: "hsl(var(--pastel-blue))",
+          dark: "hsl(var(--pastel-blue-dark))",
+        },
+      },
+      backgroundImage: {
+        "gradient-primary": "var(--gradient-primary)",
+        "gradient-card": "var(--gradient-card)",
       },
       borderRadius: {
         lg: "var(--radius)",
