@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,21 +11,28 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Search, Pencil, Trash2 } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Marcas = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const brands = [
-    { id: 1, name: "Marca A", cnpj: "12.345.678/0001-90", contact: "(11) 98765-4321", products: 45 },
-    { id: 2, name: "Marca B", cnpj: "98.765.432/0001-10", contact: "(11) 91234-5678", products: 32 },
-    { id: 3, name: "Marca C", cnpj: "45.678.901/0001-23", contact: "(11) 93456-7890", products: 28 },
-    { id: 4, name: "Marca D", cnpj: "78.901.234/0001-56", contact: "(11) 95678-9012", products: 19 },
-  ];
+  const { data: brands = [], isLoading } = useQuery({
+    queryKey: ["marcas"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("marcas")
+        .select("*")
+        .order("nome_marca");
+      
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const filteredBrands = brands.filter((brand) =>
-    brand.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    brand.cnpj.includes(searchTerm)
+    brand.nome_marca.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (brand.pais_origem && brand.pais_origem.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
@@ -62,39 +70,51 @@ const Marcas = () => {
               <TableHeader>
                 <TableRow className="bg-muted/50">
                   <TableHead>Nome</TableHead>
-                  <TableHead>CNPJ</TableHead>
-                  <TableHead>Contato</TableHead>
-                  <TableHead className="text-right">Produtos</TableHead>
+                  <TableHead>País de Origem</TableHead>
+                  <TableHead>Descrição</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredBrands.map((brand) => (
-                  <TableRow key={brand.id} className="hover:bg-muted/30">
-                    <TableCell className="font-medium">{brand.name}</TableCell>
-                    <TableCell>{brand.cnpj}</TableCell>
-                    <TableCell>{brand.contact}</TableCell>
-                    <TableCell className="text-right">{brand.products}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-primary hover:bg-primary/10"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin mx-auto" />
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : filteredBrands.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                      Nenhuma marca encontrada
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredBrands.map((brand) => (
+                    <TableRow key={brand.id} className="hover:bg-muted/30">
+                      <TableCell className="font-medium">{brand.nome_marca}</TableCell>
+                      <TableCell>{brand.pais_origem || "-"}</TableCell>
+                      <TableCell>{brand.descricao || "-"}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-primary hover:bg-primary/10"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>

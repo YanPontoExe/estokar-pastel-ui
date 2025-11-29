@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,22 +11,31 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Search, Pencil, Trash2 } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
 
 const Funcionarios = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const employees = [
-    { id: 1, name: "João Silva", cpf: "123.456.789-00", sector: "Almoxarifado", role: "Estoquista", status: "Ativo" },
-    { id: 2, name: "Maria Santos", cpf: "987.654.321-00", sector: "Produção", role: "Operador", status: "Ativo" },
-    { id: 3, name: "Pedro Costa", cpf: "456.789.123-00", sector: "Manutenção", role: "Técnico", status: "Ativo" },
-    { id: 4, name: "Ana Oliveira", cpf: "789.123.456-00", sector: "Expedição", role: "Supervisor", status: "Ativo" },
-    { id: 5, name: "Carlos Souza", cpf: "321.654.987-00", sector: "Almoxarifado", role: "Auxiliar", status: "Inativo" },
-  ];
+  const { data: employees = [], isLoading } = useQuery({
+    queryKey: ["funcionarios"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("funcionarios")
+        .select(`
+          *,
+          setores (descricao)
+        `)
+        .order("nome");
+      
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const filteredEmployees = employees.filter((employee) =>
-    employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    employee.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
     employee.cpf.includes(searchTerm)
   );
 
@@ -66,46 +76,60 @@ const Funcionarios = () => {
                   <TableHead>Nome</TableHead>
                   <TableHead>CPF</TableHead>
                   <TableHead>Setor</TableHead>
-                  <TableHead>Cargo</TableHead>
+                  <TableHead>Turno</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredEmployees.map((employee) => (
-                  <TableRow key={employee.id} className="hover:bg-muted/30">
-                    <TableCell className="font-medium">{employee.name}</TableCell>
-                    <TableCell>{employee.cpf}</TableCell>
-                    <TableCell>{employee.sector}</TableCell>
-                    <TableCell>{employee.role}</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={employee.status === "Ativo" ? "default" : "secondary"}
-                        className={employee.status === "Ativo" ? "bg-primary text-primary-foreground" : ""}
-                      >
-                        {employee.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-primary hover:bg-primary/10"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin mx-auto" />
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : filteredEmployees.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                      Nenhum funcionário encontrado
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredEmployees.map((employee) => (
+                    <TableRow key={employee.id} className="hover:bg-muted/30">
+                      <TableCell className="font-medium">{employee.nome}</TableCell>
+                      <TableCell>{employee.cpf}</TableCell>
+                      <TableCell>{employee.setores?.descricao || "-"}</TableCell>
+                      <TableCell className="capitalize">{employee.turno}</TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={employee.status ? "default" : "secondary"}
+                          className={employee.status ? "bg-primary text-primary-foreground" : ""}
+                        >
+                          {employee.status ? "Ativo" : "Inativo"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-primary hover:bg-primary/10"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>
