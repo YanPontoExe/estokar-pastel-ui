@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,22 +11,27 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Search, Pencil, Trash2 } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const Setores = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const sectors = [
-    { id: 1, name: "Almoxarifado", responsible: "João Silva", employees: 8, materials: 450 },
-    { id: 2, name: "Produção", responsible: "Maria Santos", employees: 25, materials: 180 },
-    { id: 3, name: "Manutenção", responsible: "Pedro Costa", employees: 12, materials: 95 },
-    { id: 4, name: "Expedição", responsible: "Ana Oliveira", employees: 10, materials: 60 },
-    { id: 5, name: "Acabamento", responsible: "Carlos Souza", employees: 15, materials: 120 },
-  ];
+  const { data: sectors = [], isLoading } = useQuery({
+    queryKey: ["setores"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("setores")
+        .select("*")
+        .order("descricao");
+      
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const filteredSectors = sectors.filter((sector) =>
-    sector.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    sector.responsible.toLowerCase().includes(searchTerm.toLowerCase())
+    sector.descricao.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -63,39 +69,49 @@ const Setores = () => {
               <TableHeader>
                 <TableRow className="bg-muted/50">
                   <TableHead>Nome do Setor</TableHead>
-                  <TableHead>Responsável</TableHead>
-                  <TableHead className="text-right">Funcionários</TableHead>
-                  <TableHead className="text-right">Materiais</TableHead>
+                  <TableHead>Descrição</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredSectors.map((sector) => (
-                  <TableRow key={sector.id} className="hover:bg-muted/30">
-                    <TableCell className="font-medium">{sector.name}</TableCell>
-                    <TableCell>{sector.responsible}</TableCell>
-                    <TableCell className="text-right">{sector.employees}</TableCell>
-                    <TableCell className="text-right">{sector.materials}</TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-primary hover:bg-primary/10"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin mx-auto" />
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : filteredSectors.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
+                      Nenhum setor encontrado
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredSectors.map((sector) => (
+                    <TableRow key={sector.id} className="hover:bg-muted/30">
+                      <TableCell className="font-medium">{sector.descricao}</TableCell>
+                      <TableCell>{sector.descricao}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-primary hover:bg-primary/10"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>

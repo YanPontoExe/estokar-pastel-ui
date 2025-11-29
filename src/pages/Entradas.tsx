@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,23 +11,33 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
 
 const Entradas = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const entries = [
-    { id: 1, date: "2024-01-15", material: "Parafuso M10", code: "PAR-001", qty: 200, employee: "João Silva", note: "Compra" },
-    { id: 2, date: "2024-01-14", material: "Tinta Branca 3.6L", code: "TIN-002", qty: 50, employee: "Maria Santos", note: "Compra" },
-    { id: 3, date: "2024-01-14", material: "Lixa Grão 120", code: "LIX-003", qty: 100, employee: "João Silva", note: "Devolução" },
-    { id: 4, date: "2024-01-13", material: "Cola PVA 1kg", code: "COL-004", qty: 30, employee: "Pedro Costa", note: "Compra" },
-    { id: 5, date: "2024-01-12", material: "Prego 18x30", code: "PRE-005", qty: 150, employee: "Ana Oliveira", note: "Transferência" },
-  ];
+  const { data: entries = [], isLoading } = useQuery({
+    queryKey: ["movimentacoes_entrada"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("movimentacoes_entrada")
+        .select(`
+          *,
+          materiais (codigo, descricao),
+          profiles!movimentacoes_entrada_cod_usuario_fkey (username)
+        `)
+        .order("data_entrada", { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const filteredEntries = entries.filter((entry) =>
-    entry.material.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    entry.code.toLowerCase().includes(searchTerm.toLowerCase())
+    entry.materiais?.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    entry.materiais?.codigo.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -72,20 +83,34 @@ const Entradas = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredEntries.map((entry) => (
-                  <TableRow key={entry.id} className="hover:bg-muted/30">
-                    <TableCell>{new Date(entry.date).toLocaleDateString('pt-BR')}</TableCell>
-                    <TableCell className="font-medium">{entry.code}</TableCell>
-                    <TableCell>{entry.material}</TableCell>
-                    <TableCell className="text-right">
-                      <Badge className="bg-primary text-primary-foreground">
-                        +{entry.qty}
-                      </Badge>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin mx-auto" />
                     </TableCell>
-                    <TableCell>{entry.employee}</TableCell>
-                    <TableCell>{entry.note}</TableCell>
                   </TableRow>
-                ))}
+                ) : filteredEntries.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                      Nenhuma entrada encontrada
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredEntries.map((entry) => (
+                    <TableRow key={entry.id} className="hover:bg-muted/30">
+                      <TableCell>{new Date(entry.data_entrada).toLocaleDateString('pt-BR')}</TableCell>
+                      <TableCell className="font-medium">{entry.materiais?.codigo}</TableCell>
+                      <TableCell>{entry.materiais?.descricao}</TableCell>
+                      <TableCell className="text-right">
+                        <Badge className="bg-primary text-primary-foreground">
+                          +{entry.quantidade}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{entry.profiles?.username || "-"}</TableCell>
+                      <TableCell>{entry.observacoes || "-"}</TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>

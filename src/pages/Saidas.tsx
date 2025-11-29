@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,23 +11,34 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
 
 const Saidas = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const exits = [
-    { id: 1, date: "2024-01-15", material: "Parafuso M10", code: "PAR-001", qty: 50, employee: "João Silva", destination: "Produção" },
-    { id: 2, date: "2024-01-15", material: "Tinta Branca 3.6L", code: "TIN-002", qty: 5, employee: "Maria Santos", destination: "Manutenção" },
-    { id: 3, date: "2024-01-14", material: "Lixa Grão 120", code: "LIX-003", qty: 20, employee: "Pedro Costa", destination: "Acabamento" },
-    { id: 4, date: "2024-01-14", material: "Cola PVA 1kg", code: "COL-004", qty: 8, employee: "Ana Oliveira", destination: "Produção" },
-    { id: 5, date: "2024-01-13", material: "Prego 18x30", code: "PRE-005", qty: 100, employee: "João Silva", destination: "Construção" },
-  ];
+  const { data: exits = [], isLoading } = useQuery({
+    queryKey: ["movimentacoes_saida"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("movimentacoes_saida")
+        .select(`
+          *,
+          materiais (codigo, descricao),
+          profiles!movimentacoes_saida_cod_usuario_fkey (username),
+          funcionarios (nome)
+        `)
+        .order("data_saida", { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const filteredExits = exits.filter((exit) =>
-    exit.material.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    exit.code.toLowerCase().includes(searchTerm.toLowerCase())
+    exit.materiais?.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    exit.materiais?.codigo.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -67,25 +79,39 @@ const Saidas = () => {
                   <TableHead>Código</TableHead>
                   <TableHead>Material</TableHead>
                   <TableHead className="text-right">Quantidade</TableHead>
-                  <TableHead>Funcionário</TableHead>
-                  <TableHead>Destino</TableHead>
+                  <TableHead>Usuário</TableHead>
+                  <TableHead>Motivo</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredExits.map((exit) => (
-                  <TableRow key={exit.id} className="hover:bg-muted/30">
-                    <TableCell>{new Date(exit.date).toLocaleDateString('pt-BR')}</TableCell>
-                    <TableCell className="font-medium">{exit.code}</TableCell>
-                    <TableCell>{exit.material}</TableCell>
-                    <TableCell className="text-right">
-                      <Badge variant="secondary" className="bg-destructive/10 text-destructive">
-                        -{exit.qty}
-                      </Badge>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin mx-auto" />
                     </TableCell>
-                    <TableCell>{exit.employee}</TableCell>
-                    <TableCell>{exit.destination}</TableCell>
                   </TableRow>
-                ))}
+                ) : filteredExits.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                      Nenhuma saída encontrada
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredExits.map((exit) => (
+                    <TableRow key={exit.id} className="hover:bg-muted/30">
+                      <TableCell>{new Date(exit.data_saida).toLocaleDateString('pt-BR')}</TableCell>
+                      <TableCell className="font-medium">{exit.materiais?.codigo}</TableCell>
+                      <TableCell>{exit.materiais?.descricao}</TableCell>
+                      <TableCell className="text-right">
+                        <Badge variant="secondary" className="bg-destructive/10 text-destructive">
+                          -{exit.quantidade}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{exit.profiles?.username || "-"}</TableCell>
+                      <TableCell className="capitalize">{exit.motivo}</TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>

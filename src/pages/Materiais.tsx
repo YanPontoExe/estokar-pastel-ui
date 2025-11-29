@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,24 +11,33 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Search, Pencil, Trash2 } from "lucide-react";
+import { Plus, Search, Pencil, Trash2, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 const Materiais = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
 
-  const materials = [
-    { id: 1, name: "Parafuso M10", code: "PAR-001", brand: "Marca A", qty: 150, unit: "UN" },
-    { id: 2, name: "Tinta Branca 3.6L", code: "TIN-002", brand: "Marca B", qty: 45, unit: "UN" },
-    { id: 3, name: "Lixa Grão 120", code: "LIX-003", brand: "Marca C", qty: 230, unit: "UN" },
-    { id: 4, name: "Cola PVA 1kg", code: "COL-004", brand: "Marca A", qty: 78, unit: "UN" },
-    { id: 5, name: "Prego 18x30", code: "PRE-005", brand: "Marca D", qty: 520, unit: "KG" },
-  ];
+  const { data: materials = [], isLoading } = useQuery({
+    queryKey: ["materiais"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("materiais")
+        .select(`
+          *,
+          marcas (nome_marca)
+        `)
+        .order("descricao");
+      
+      if (error) throw error;
+      return data;
+    },
+  });
 
   const filteredMaterials = materials.filter((material) =>
-    material.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    material.code.toLowerCase().includes(searchTerm.toLowerCase())
+    material.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    material.codigo.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -72,34 +82,48 @@ const Materiais = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredMaterials.map((material) => (
-                  <TableRow key={material.id} className="hover:bg-muted/30">
-                    <TableCell className="font-medium">{material.code}</TableCell>
-                    <TableCell>{material.name}</TableCell>
-                    <TableCell>{material.brand}</TableCell>
-                    <TableCell className="text-right">
-                      {material.qty} {material.unit}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-primary hover:bg-primary/10"
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 text-destructive hover:bg-destructive/10"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-8">
+                      <Loader2 className="h-6 w-6 animate-spin mx-auto" />
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : filteredMaterials.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                      Nenhum material encontrado
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredMaterials.map((material) => (
+                    <TableRow key={material.id} className="hover:bg-muted/30">
+                      <TableCell className="font-medium">{material.codigo}</TableCell>
+                      <TableCell>{material.descricao}</TableCell>
+                      <TableCell>{material.marcas?.nome_marca || "-"}</TableCell>
+                      <TableCell className="text-right">
+                        {material.quantidade_estoque} {material.unidade}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-primary hover:bg-primary/10"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>
