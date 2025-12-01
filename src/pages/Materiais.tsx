@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { materiaisAPI } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,31 +13,32 @@ import {
 } from "@/components/ui/table";
 import { Plus, Search, Pencil, Trash2, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 
 const Materiais = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  const [materials, setMaterials] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const { data: materials = [], isLoading } = useQuery({
-    queryKey: ["materiais"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("materiais")
-        .select(`
-          *,
-          marcas (nome_marca)
-        `)
-        .order("descricao");
-      
-      if (error) throw error;
-      return data;
-    },
-  });
+  useEffect(() => {
+    fetchMaterials();
+  }, []);
+
+  const fetchMaterials = async () => {
+    try {
+      setIsLoading(true);
+      const data = await materiaisAPI.getAll();
+      setMaterials(data);
+    } catch (error) {
+      console.error("Erro ao carregar materiais:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const filteredMaterials = materials.filter((material) =>
-    material.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    material.codigo.toLowerCase().includes(searchTerm.toLowerCase())
+    material.descricao?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    material.codigo?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -99,7 +100,7 @@ const Materiais = () => {
                     <TableRow key={material.id} className="hover:bg-muted/30">
                       <TableCell className="font-medium">{material.codigo}</TableCell>
                       <TableCell>{material.descricao}</TableCell>
-                      <TableCell>{material.marcas?.nome_marca || "-"}</TableCell>
+                      <TableCell>{material.marca || "-"}</TableCell>
                       <TableCell className="text-right">
                         {material.quantidade_estoque} {material.unidade}
                       </TableCell>

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { saidasAPI } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,32 +13,31 @@ import {
 } from "@/components/ui/table";
 import { Plus, Search, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
 
 const Saidas = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [exits, setExits] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const { data: exits = [], isLoading } = useQuery({
-    queryKey: ["movimentacoes_saida"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("movimentacoes_saida")
-        .select(`
-          *,
-          materiais (codigo, descricao),
-          profiles!movimentacoes_saida_cod_usuario_fkey (username),
-          funcionarios (nome)
-        `)
-        .order("data_saida", { ascending: false });
-      
-      if (error) throw error;
-      return data;
-    },
-  });
+  useEffect(() => {
+    fetchExits();
+  }, []);
+
+  const fetchExits = async () => {
+    try {
+      setIsLoading(true);
+      const data = await saidasAPI.getAll();
+      setExits(data);
+    } catch (error) {
+      console.error("Erro ao carregar saídas:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const filteredExits = exits.filter((exit) =>
-    exit.materiais?.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    exit.materiais?.codigo.toLowerCase().includes(searchTerm.toLowerCase())
+    exit.material?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    exit.codigo?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -100,14 +99,14 @@ const Saidas = () => {
                   filteredExits.map((exit) => (
                     <TableRow key={exit.id} className="hover:bg-muted/30">
                       <TableCell>{new Date(exit.data_saida).toLocaleDateString('pt-BR')}</TableCell>
-                      <TableCell className="font-medium">{exit.materiais?.codigo}</TableCell>
-                      <TableCell>{exit.materiais?.descricao}</TableCell>
+                      <TableCell className="font-medium">{exit.codigo}</TableCell>
+                      <TableCell>{exit.material}</TableCell>
                       <TableCell className="text-right">
                         <Badge variant="secondary" className="bg-destructive/10 text-destructive">
                           -{exit.quantidade}
                         </Badge>
                       </TableCell>
-                      <TableCell>{exit.profiles?.username || "-"}</TableCell>
+                      <TableCell>{exit.usuario || "-"}</TableCell>
                       <TableCell className="capitalize">{exit.motivo}</TableCell>
                     </TableRow>
                   ))

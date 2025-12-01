@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { marcasAPI } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,26 +12,30 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Plus, Search, Pencil, Trash2, Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 
 const Marcas = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [brands, setBrands] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const { data: brands = [], isLoading } = useQuery({
-    queryKey: ["marcas"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("marcas")
-        .select("*")
-        .order("nome_marca");
-      
-      if (error) throw error;
-      return data;
-    },
-  });
+  useEffect(() => {
+    fetchBrands();
+  }, []);
+
+  const fetchBrands = async () => {
+    try {
+      setIsLoading(true);
+      const data = await marcasAPI.getAll();
+      setBrands(data);
+    } catch (error) {
+      console.error("Erro ao carregar marcas:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const filteredBrands = brands.filter((brand) =>
-    brand.nome_marca.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    brand.nome_marca?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (brand.pais_origem && brand.pais_origem.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
