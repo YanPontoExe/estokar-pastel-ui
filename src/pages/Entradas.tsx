@@ -26,6 +26,7 @@ const Entradas = () => {
         .select(`
           *,
           materiais (codigo, descricao),
+          fornecedores (nome_fornecedor),
           profiles!movimentacoes_entrada_cod_usuario_fkey (username)
         `)
         .order("data_entrada", { ascending: false });
@@ -78,20 +79,21 @@ const Entradas = () => {
                   <TableHead>Código</TableHead>
                   <TableHead>Material</TableHead>
                   <TableHead className="text-right">Quantidade</TableHead>
-                  <TableHead>Funcionário</TableHead>
+                  <TableHead>Fornecedor</TableHead>
+                  <TableHead>Nota Fiscal</TableHead>
                   <TableHead>Observação</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8">
+                    <TableCell colSpan={7} className="text-center py-8">
                       <Loader2 className="h-6 w-6 animate-spin mx-auto" />
                     </TableCell>
                   </TableRow>
                 ) : filteredEntries.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                       Nenhuma entrada encontrada
                     </TableCell>
                   </TableRow>
@@ -106,7 +108,8 @@ const Entradas = () => {
                           +{entry.quantidade}
                         </Badge>
                       </TableCell>
-                      <TableCell>{entry.profiles?.username || "-"}</TableCell>
+                      <TableCell>{entry.fornecedores?.nome_fornecedor || "-"}</TableCell>
+                      <TableCell>{entry.nota_fiscal || "-"}</TableCell>
                       <TableCell>{entry.observacoes || "-"}</TableCell>
                     </TableRow>
                   ))
