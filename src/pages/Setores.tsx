@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { setoresAPI } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,26 +12,30 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Plus, Search, Pencil, Trash2, Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 
 const Setores = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [sectors, setSectors] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const { data: sectors = [], isLoading } = useQuery({
-    queryKey: ["setores"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("setores")
-        .select("*")
-        .order("descricao");
-      
-      if (error) throw error;
-      return data;
-    },
-  });
+  useEffect(() => {
+    fetchSectors();
+  }, []);
+
+  const fetchSectors = async () => {
+    try {
+      setIsLoading(true);
+      const data = await setoresAPI.getAll();
+      setSectors(data);
+    } catch (error) {
+      console.error("Erro ao carregar setores:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const filteredSectors = sectors.filter((sector) =>
-    sector.descricao.toLowerCase().includes(searchTerm.toLowerCase())
+    sector.descricao?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (

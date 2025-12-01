@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { entradasAPI } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,32 +13,31 @@ import {
 } from "@/components/ui/table";
 import { Plus, Search, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
 
 const Entradas = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [entries, setEntries] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const { data: entries = [], isLoading } = useQuery({
-    queryKey: ["movimentacoes_entrada"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("movimentacoes_entrada")
-        .select(`
-          *,
-          materiais (codigo, descricao),
-          fornecedores (nome_fornecedor),
-          profiles!movimentacoes_entrada_cod_usuario_fkey (username)
-        `)
-        .order("data_entrada", { ascending: false });
-      
-      if (error) throw error;
-      return data;
-    },
-  });
+  useEffect(() => {
+    fetchEntries();
+  }, []);
+
+  const fetchEntries = async () => {
+    try {
+      setIsLoading(true);
+      const data = await entradasAPI.getAll();
+      setEntries(data);
+    } catch (error) {
+      console.error("Erro ao carregar entradas:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const filteredEntries = entries.filter((entry) =>
-    entry.materiais?.descricao.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    entry.materiais?.codigo.toLowerCase().includes(searchTerm.toLowerCase())
+    entry.material?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    entry.codigo?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -101,14 +100,14 @@ const Entradas = () => {
                   filteredEntries.map((entry) => (
                     <TableRow key={entry.id} className="hover:bg-muted/30">
                       <TableCell>{new Date(entry.data_entrada).toLocaleDateString('pt-BR')}</TableCell>
-                      <TableCell className="font-medium">{entry.materiais?.codigo}</TableCell>
-                      <TableCell>{entry.materiais?.descricao}</TableCell>
+                      <TableCell className="font-medium">{entry.codigo}</TableCell>
+                      <TableCell>{entry.material}</TableCell>
                       <TableCell className="text-right">
                         <Badge className="bg-primary text-primary-foreground">
                           +{entry.quantidade}
                         </Badge>
                       </TableCell>
-                      <TableCell>{entry.fornecedores?.nome_fornecedor || "-"}</TableCell>
+                      <TableCell>{entry.fornecedor || "-"}</TableCell>
                       <TableCell>{entry.nota_fiscal || "-"}</TableCell>
                       <TableCell>{entry.observacoes || "-"}</TableCell>
                     </TableRow>

@@ -12,8 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Plus, Search, Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { usuariosAPI } from "@/services/api";
 
 type UserWithRole = {
   id: string;
@@ -26,7 +25,6 @@ const Usuarios = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
 
   useEffect(() => {
     fetchUsers();
@@ -35,42 +33,10 @@ const Usuarios = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      
-      // Get all users from auth.users via profiles
-      const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
-      
-      if (authError) throw authError;
-
-      // Get profiles and roles
-      const { data: profiles, error: profilesError } = await supabase
-        .from("profiles")
-        .select(`
-          id,
-          username,
-          user_roles (role)
-        `);
-
-      if (profilesError) throw profilesError;
-
-      const usersWithRoles: UserWithRole[] = authUsers.users.map((authUser) => {
-        const profile = profiles?.find((p) => p.id === authUser.id);
-        const role = profile?.user_roles?.[0]?.role || "operador";
-        
-        return {
-          id: authUser.id,
-          username: profile?.username || "Sem username",
-          email: authUser.email || "Sem email",
-          role: role,
-        };
-      });
-
-      setUsers(usersWithRoles);
-    } catch (error: any) {
-      toast({
-        title: "Erro ao carregar usuários",
-        description: error.message,
-        variant: "destructive",
-      });
+      const data = await usuariosAPI.getAll();
+      setUsers(data);
+    } catch (error) {
+      console.error("Erro ao carregar usuários:", error);
     } finally {
       setLoading(false);
     }

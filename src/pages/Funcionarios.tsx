@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect } from "react";
+import { funcionariosAPI } from "@/services/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,30 +13,31 @@ import {
 } from "@/components/ui/table";
 import { Plus, Search, Pencil, Trash2, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/integrations/supabase/client";
 
 const Funcionarios = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [employees, setEmployees] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const { data: employees = [], isLoading } = useQuery({
-    queryKey: ["funcionarios"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("funcionarios")
-        .select(`
-          *,
-          setores (descricao)
-        `)
-        .order("nome");
-      
-      if (error) throw error;
-      return data;
-    },
-  });
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
+
+  const fetchEmployees = async () => {
+    try {
+      setIsLoading(true);
+      const data = await funcionariosAPI.getAll();
+      setEmployees(data);
+    } catch (error) {
+      console.error("Erro ao carregar funcionários:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const filteredEmployees = employees.filter((employee) =>
-    employee.nome.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    employee.cpf.includes(searchTerm)
+    employee.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    employee.cpf?.includes(searchTerm)
   );
 
   return (
@@ -99,7 +100,7 @@ const Funcionarios = () => {
                     <TableRow key={employee.id} className="hover:bg-muted/30">
                       <TableCell className="font-medium">{employee.nome}</TableCell>
                       <TableCell>{employee.cpf}</TableCell>
-                      <TableCell>{employee.setores?.descricao || "-"}</TableCell>
+                      <TableCell>{employee.setor || "-"}</TableCell>
                       <TableCell className="capitalize">{employee.turno}</TableCell>
                       <TableCell>
                         <Badge
