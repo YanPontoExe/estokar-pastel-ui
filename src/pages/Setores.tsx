@@ -69,7 +69,7 @@ const Setores = () => {
               <TableHeader>
                 <TableRow className="bg-muted/50">
                   <TableHead>Nome do Setor</TableHead>
-                  <TableHead>Descrição</TableHead>
+                  <TableHead>Data de Criação</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
@@ -90,7 +90,9 @@ const Setores = () => {
                   filteredSectors.map((sector) => (
                     <TableRow key={sector.id} className="hover:bg-muted/30">
                       <TableCell className="font-medium">{sector.descricao}</TableCell>
-                      <TableCell>{sector.descricao}</TableCell>
+                      <TableCell>
+                        {new Date(sector.created_at).toLocaleDateString('pt-BR')}
+                      </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button
