@@ -1,85 +1,65 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
+import { authAPI } from "@/services/api";
 
 const loginSchema = z.object({
-  email: z.string().email("Email inválido"),
+  username: z.string().min(3, "Username deve ter no mínimo 3 caracteres"),
   password: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
 });
 
-const signupSchema = loginSchema.extend({
-  username: z.string().min(3, "Username deve ter no mínimo 3 caracteres").max(50),
-});
+const signupSchema = loginSchema;
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
     // Check if user is already logged in
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        navigate("/");
-      }
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
-        navigate("/");
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      navigate("/");
+    }
   }, [navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
-      loginSchema.parse({ email, password });
+      loginSchema.parse({ username, password });
       setLoading(true);
 
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const response = await authAPI.login(username, password);
+      
+      localStorage.setItem('auth_token', response.token);
+      localStorage.setItem('user', JSON.stringify(response.user));
+      
+      toast({
+        title: "Login realizado!",
+        description: "Bem-vindo ao EstoKar",
       });
-
-      if (error) {
-        if (error.message.includes("Invalid login credentials")) {
-          toast({
-            title: "Erro no login",
-            description: "Email ou senha incorretos",
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Erro no login",
-            description: error.message,
-            variant: "destructive",
-          });
-        }
-      } else {
-        toast({
-          title: "Login realizado!",
-          description: "Bem-vindo ao EstoKar",
-        });
-      }
-    } catch (error) {
+      
+      navigate("/");
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         toast({
           title: "Erro de validação",
           description: error.errors[0].message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Erro no login",
+          description: error.message || "Username ou senha incorretos",
           variant: "destructive",
         });
       }
@@ -92,46 +72,27 @@ const Auth = () => {
     e.preventDefault();
     
     try {
-      signupSchema.parse({ email, password, username });
+      signupSchema.parse({ username, password });
       setLoading(true);
 
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-          data: {
-            username,
-          },
-        },
+      await authAPI.signup(username, password);
+      
+      toast({
+        title: "Cadastro realizado!",
+        description: "Você já pode fazer login",
       });
-
-      if (error) {
-        if (error.message.includes("User already registered")) {
-          toast({
-            title: "Erro no cadastro",
-            description: "Este email já está cadastrado",
-            variant: "destructive",
-          });
-        } else {
-          toast({
-            title: "Erro no cadastro",
-            description: error.message,
-            variant: "destructive",
-          });
-        }
-      } else {
-        toast({
-          title: "Cadastro realizado!",
-          description: "Você já pode fazer login",
-        });
-        setIsLogin(true);
-      }
-    } catch (error) {
+      setIsLogin(true);
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         toast({
           title: "Erro de validação",
           description: error.errors[0].message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Erro no cadastro",
+          description: error.message || "Este username já está cadastrado",
           variant: "destructive",
         });
       }
@@ -153,26 +114,13 @@ const Auth = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={isLogin ? handleLogin : handleSignup} className="space-y-4">
-            {!isLogin && (
-              <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  placeholder="Seu username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  required
-                />
-              </div>
-            )}
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="username">Username</Label>
               <Input
-                id="email"
-                type="email"
-                placeholder="seu@email.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                id="username"
+                placeholder="Seu username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 required
               />
             </div>
