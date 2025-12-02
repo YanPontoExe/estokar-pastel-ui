@@ -30,6 +30,8 @@ async function request<T>(
   }
 }
 
+
+
 // MARCAS
 export const marcasAPI = {
   getAll: () => request<any[]>('/Marcas'),
@@ -151,11 +153,11 @@ export const usuariosAPI = {
 
 // AUTENTICAÇÃO
 export const authAPI = {
-  login: (username: string, password: string) => request<{ token: string; user: any }>('/Auth/login', {
+  login: (username: string, password: string) => request<{ token: string; user: any }>('/api/login', {
     method: 'POST',
     body: JSON.stringify({ username, password }),
   }),
-  signup: (username: string, password: string) => request<any>('/Auth/signup', {
+  signup: (username: string, password: string) => request<any>('/cadastrar', {
     method: 'POST',
     body: JSON.stringify({ username, password }),
   }),

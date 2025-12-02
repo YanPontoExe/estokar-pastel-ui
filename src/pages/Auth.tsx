@@ -20,14 +20,16 @@ const Auth = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    // Check if user is already logged in
     const token = localStorage.getItem('auth_token');
     if (token) {
       navigate("/");
+    } else {
+      setAuthChecked(true);
     }
   }, [navigate]);
 
@@ -100,6 +102,14 @@ const Auth = () => {
       setLoading(false);
     }
   };
+
+  if (!authChecked) {
+    return (
+        <div className="min-h-screen flex items-center justify-center">
+            Verificando autenticação...
+        </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pastel-blue-100 via-background to-pastel-blue-50 p-4">
