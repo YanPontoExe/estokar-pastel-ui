@@ -234,13 +234,6 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "movimentacoes_entrada_cod_usuario_temp_fkey"
-            columns: ["cod_usuario_temp"]
-            isOneToOne: false
-            referencedRelation: "usuarios"
-            referencedColumns: ["id"]
-          },
         ]
       }
       movimentacoes_saida: {
@@ -300,13 +293,6 @@ export type Database = {
             columns: ["cod_usuario"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "movimentacoes_saida_cod_usuario_temp_fkey"
-            columns: ["cod_usuario_temp"]
-            isOneToOne: false
-            referencedRelation: "usuarios"
             referencedColumns: ["id"]
           },
         ]
@@ -384,30 +370,18 @@ export type Database = {
       }
       usuarios: {
         Row: {
-          created_at: string
           id: string
           password_hash: string
-          role: Database["public"]["Enums"]["app_role"]
-          status: boolean
-          updated_at: string
           username: string
         }
         Insert: {
-          created_at?: string
           id?: string
           password_hash: string
-          role?: Database["public"]["Enums"]["app_role"]
-          status?: boolean
-          updated_at?: string
           username: string
         }
         Update: {
-          created_at?: string
           id?: string
           password_hash?: string
-          role?: Database["public"]["Enums"]["app_role"]
-          status?: boolean
-          updated_at?: string
           username?: string
         }
         Relationships: []
