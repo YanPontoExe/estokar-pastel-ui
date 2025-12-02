@@ -293,7 +293,52 @@ Remove uma saída.
 
 ---
 
-## 7. Usuários
+## 7. Autenticação
+
+### POST /Auth/login
+Autentica um usuário.
+
+**Body:**
+```json
+{
+  "username": "string",
+  "password": "string"
+}
+```
+
+**Response:**
+```json
+{
+  "token": "string",
+  "user": {
+    "id": "uuid",
+    "username": "string"
+  }
+}
+```
+
+### POST /Auth/signup
+Cadastra um novo usuário.
+
+**Body:**
+```json
+{
+  "username": "string",
+  "password": "string"
+}
+```
+
+**Response:**
+```json
+{
+  "id": "uuid",
+  "username": "string"
+}
+```
+
+---
+
+## 8. Usuários
 
 ### GET /Usuarios
 Lista todos os usuários do sistema.
@@ -303,11 +348,7 @@ Lista todos os usuários do sistema.
 [
   {
     "id": "uuid",
-    "username": "string",
-    "email": "string",
-    "role": "admin|gerente|operador|consultor",
-    "created_at": "timestamp",
-    "updated_at": "timestamp"
+    "username": "string"
   }
 ]
 ```
@@ -315,28 +356,22 @@ Lista todos os usuários do sistema.
 ### GET /Usuarios/{id}
 Busca um usuário específico por ID.
 
-### POST /Usuarios
-Cria um novo usuário.
+### PUT /Usuarios/{id}
+Atualiza senha de um usuário.
 
 **Body:**
 ```json
 {
-  "username": "string",
-  "email": "string",
-  "password": "string",
-  "role": "admin|gerente|operador|consultor"
+  "password": "string"
 }
 ```
-
-### PUT /Usuarios/{id}
-Atualiza um usuário existente.
 
 ### DELETE /Usuarios/{id}
 Remove um usuário.
 
 ---
 
-## 8. Dashboard
+## 9. Dashboard
 
 ### GET /Dashboard/stats
 Retorna estatísticas gerais do sistema.
