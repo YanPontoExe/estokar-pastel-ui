@@ -149,6 +149,18 @@ export const usuariosAPI = {
   }),
 };
 
+// AUTENTICAÇÃO
+export const authAPI = {
+  login: (username: string, password: string) => request<{ token: string; user: any }>('/Auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ username, password }),
+  }),
+  signup: (username: string, password: string) => request<any>('/Auth/signup', {
+    method: 'POST',
+    body: JSON.stringify({ username, password }),
+  }),
+};
+
 // DASHBOARD
 export const dashboardAPI = {
   getStats: () => request<any>('/Dashboard/stats'),
