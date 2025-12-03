@@ -13,8 +13,10 @@ import {
 } from "@/components/ui/table";
 import { Plus, Search, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 
 const Saidas = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [exits, setExits] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -47,7 +49,7 @@ const Saidas = () => {
           <h1 className="text-3xl font-bold text-foreground">Saídas</h1>
           <p className="text-muted-foreground">Registre e visualize saídas de materiais</p>
         </div>
-        <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+        <Button onClick={() => navigate("/saidas/nova")}  className="bg-primary text-primary-foreground hover:bg-primary/90">
           <Plus className="mr-2 h-4 w-4" />
           Registrar Saída
         </Button>

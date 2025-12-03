@@ -12,8 +12,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Plus, Search, Pencil, Trash2, Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Setores = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [sectors, setSectors] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,7 +47,7 @@ const Setores = () => {
           <h1 className="text-3xl font-bold text-foreground">Setores</h1>
           <p className="text-muted-foreground">Gerencie os setores da empresa</p>
         </div>
-        <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+        <Button onClick={() => navigate("/setores/novo")} className="bg-primary text-primary-foreground hover:bg-primary/90">
           <Plus className="mr-2 h-4 w-4" />
           Novo Setor
         </Button>

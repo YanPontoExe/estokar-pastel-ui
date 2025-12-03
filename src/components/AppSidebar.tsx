@@ -28,7 +28,6 @@ const menuItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "Materiais", url: "/materiais", icon: Package },
   { title: "Funcionários", url: "/funcionarios", icon: Users },
-  { title: "Usuários", url: "/usuarios", icon: UserCircle },
   { title: "Marcas", url: "/marcas", icon: Tag },
   { title: "Entradas", url: "/entradas", icon: ArrowDownToLine },
   { title: "Saídas", url: "/saidas", icon: ArrowUpFromLine },

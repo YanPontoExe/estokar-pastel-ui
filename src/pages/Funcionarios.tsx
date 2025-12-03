@@ -13,8 +13,10 @@ import {
 } from "@/components/ui/table";
 import { Plus, Search, Pencil, Trash2, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Navigate, useNavigate } from "react-router-dom";
 
 const Funcionarios = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [employees, setEmployees] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -47,7 +49,7 @@ const Funcionarios = () => {
           <h1 className="text-3xl font-bold text-foreground">Funcionários</h1>
           <p className="text-muted-foreground">Gerencie o cadastro de funcionários</p>
         </div>
-        <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+        <Button onClick={() => navigate("/funcionarios/novo")} className="bg-primary text-primary-foreground hover:bg-primary/90">
           <Plus className="mr-2 h-4 w-4" />
           Novo Funcionário
         </Button>
