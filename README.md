@@ -63,4 +63,4 @@ A aplicação será aberta automaticamente em seu navegador, geralmente em **`ht
 O frontend interage com o Backend através de requisições HTTP RESTful.
 
 * **URL Base da API:** `API_BASE_URL = 'http://localhost:8080'`
-* **Biblioteca HTTP:** [Ex: Axios, Fetch API]
+* **Biblioteca HTTP:** Fetch API
