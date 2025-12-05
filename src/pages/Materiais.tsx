@@ -41,6 +41,9 @@ const Materiais = () => {
     material.codigo?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // O número de colunas é 3: Nome, Marca e Ações.
+  const COL_SPAN = 3; 
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -75,35 +78,35 @@ const Materiais = () => {
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/50">
-                  <TableHead>Código</TableHead>
+                  {/* Modificação 1: Manter apenas Nome, Marca e Ações */}
                   <TableHead>Nome</TableHead>
                   <TableHead>Marca</TableHead>
-                  <TableHead className="text-right">Quantidade</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
+                  <TableHead className="text-right">Ações</TableHead> 
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8">
+                    {/* Ajuste o colSpan para o novo número de colunas (3) */}
+                    <TableCell colSpan={COL_SPAN} className="text-center py-8">
                       <Loader2 className="h-6 w-6 animate-spin mx-auto" />
                     </TableCell>
                   </TableRow>
                 ) : filteredMaterials.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                    {/* Ajuste o colSpan para o novo número de colunas (3) */}
+                    <TableCell colSpan={COL_SPAN} className="text-center py-8 text-muted-foreground">
                       Nenhum material encontrado
                     </TableCell>
                   </TableRow>
                 ) : (
                   filteredMaterials.map((material) => (
                     <TableRow key={material.id} className="hover:bg-muted/30">
-                      <TableCell className="font-medium">{material.codigo}</TableCell>
-                      <TableCell>{material.descricao}</TableCell>
+                      {/* Modificação 2: Manter apenas Nome e Marca */}
+                      <TableCell className="font-medium">{material.descricao}</TableCell>
                       <TableCell>{material.marca || "-"}</TableCell>
-                      <TableCell className="text-right">
-                        {material.quantidade_estoque} {material.unidade}
-                      </TableCell>
+                      
+                      {/* Manter a coluna de Ações */}
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button

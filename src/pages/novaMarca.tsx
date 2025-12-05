@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // 👈 1. Importar o hook de navegação
+// import { useNavigate } from 'react-router-dom'; // 👈 REMOVIDO: Não é suportado no ambiente Canvas
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,9 +26,15 @@ interface FormMarcaData {
 }
 
 // ✅ Componente principal para Cadastro de Marcas
-// 2. O componente agora não espera NENHUMA prop
-const NovaMarca = () => {
-    const navigate = useNavigate(); // 👈 3. Obter a função de navegação usando o hook
+const App = () => { // 👈 Renomeado para App
+    
+    // 🧭 MODIFICAÇÃO DE NAVEGAÇÃO: Implementando a função de redirecionamento limpo
+    const handleNavigation = (path: string) => {
+        console.log(`Navegação limpa simulada para: ${path}`);
+        const baseUrl = window.location.origin;
+        // Usa window.location.replace para ir para a URL completa do destino
+        window.location.replace(`${baseUrl}${path}`);
+    };
 
     // Inicialização do estado
     const [marcaData, setMarcaData] = useState<FormMarcaData>({ 
@@ -61,8 +67,8 @@ const NovaMarca = () => {
             
             if (response && response.status >= 200 && response.status < 300) {
                 toast.success(response.data.message || "Marca cadastrada com sucesso!");
-                // 4. Usar a função de navegação obtida pelo hook
-                navigate("/marcas"); 
+                // 4. Usar a função de navegação limpa
+                handleNavigation("/"); 
             } else {
                  toast.error(`Erro ao cadastrar marca.`);
             }
@@ -76,8 +82,8 @@ const NovaMarca = () => {
     return (
         <div className="space-y-6 p-4 md:p-8 bg-gray-50 min-h-screen">
             <div className="flex items-center gap-4">
-                {/* 5. Usar a função de navegação obtida pelo hook */}
-                <Button variant="ghost" size="icon" onClick={() => navigate("/marcas")} className="hover:bg-gray-200">
+                {/* 5. Usar a função de navegação limpa */}
+                <Button variant="ghost" size="icon" onClick={() => handleNavigation("/marcas")} className="hover:bg-gray-200">
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div>
@@ -159,8 +165,8 @@ const NovaMarca = () => {
                             <Button
                                 type="button"
                                 variant="outline"
-                                // 6. Usar a função de navegação obtida pelo hook
-                                onClick={() => navigate("/marcas")}
+                                // 6. Usar a função de navegação limpa
+                                onClick={() => handleNavigation("/marcas")}
                                 className="hover:bg-gray-100 border-gray-300 text-gray-700"
                             >
                                 Cancelar
@@ -176,4 +182,4 @@ const NovaMarca = () => {
     );
 };
 
-export default NovaMarca; // 7. Renomeei para NovaMarca para clareza
+export default App;

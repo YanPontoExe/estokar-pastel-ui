@@ -31,10 +31,17 @@ interface FormFuncionarioData {
 
 // ✅ Componente principal para Cadastro de Funcionários
 const App = () => {
-  // 🧭 SIMULAÇÃO DE NAVEGAÇÃO: Função para simular a navegação
+  
+  // 🧭 MODIFICAÇÃO CHAVE APLICADA: Usa window.location.replace para navegação limpa
   const handleNavigation = (path: string) => {
-    console.log(`Navegação simulada para: ${path}`);
-    window.location.hash = path; 
+    console.log(`Navegação limpa simulada para: ${path}`);
+    
+    // Pega o domínio base (Ex: http://localhost:8081)
+    const baseUrl = window.location.origin;
+    
+    // Usa window.location.replace para ir para a URL completa do destino (Ex: http://localhost:8081/funcionarios)
+    // Isso substitui o caminho anterior, resolvendo o problema do URL com hash duplo.
+    window.location.replace(`${baseUrl}${path}`);
   };
   
   const [funcionarioData, setFuncionarioData] = useState<FormFuncionarioData>({
@@ -81,10 +88,15 @@ const App = () => {
       } else {
         const errorDetail = response?.data?.message || 'Detalhes desconhecidos';
         toast.error(`Erro ao cadastrar: Status ${response?.status || 'N/A'} - ${errorDetail}`);
+        // Redireciona, mesmo que haja erro, para sair da tela de cadastro
+        handleNavigation("/");
       }
     } catch (error) {
       console.error("Erro na requisição:", error);
       toast.error("Erro ao conectar com o servidor ou ao cadastrar o funcionário.");
+      
+      // ✅ Redirecionamento forçado em caso de erro de comunicação
+      handleNavigation("/funcionarios"); 
     }
   };
 
@@ -127,8 +139,6 @@ const App = () => {
                 />
               </div>
 
-              {/* O campo id_funcionario foi removido daqui */}
-              
               {/* 2. setor */}
               <div className="space-y-2">
                 <Label htmlFor="setor" className="font-medium text-gray-700">Setor</Label>

@@ -34,34 +34,34 @@ async function request<T>(
 
 // MARCAS
 export const marcasAPI = {
-  getAll: () => request<any[]>('/Marca'),
-  getById: (id: string) => request<any>(`/Marca/${id}`),
-  create: (data: any) => request<any>('/Marca', {
+  getAll: () => request<any[]>('/api/Marca'),
+  getById: (id: string) => request<any>(`/api/Marca/${id}`),
+  create: (data: any) => request<any>('/api/Marca', {
     method: 'POST',
     body: JSON.stringify(data),
   }),
-  update: (id: string, data: any) => request<any>(`/Marca/${id}`, {
+  update: (id: string, data: any) => request<any>(`/api/Marca/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   }),
-  delete: (id: string) => request<void>(`/Marca/${id}`, {
+  delete: (id: string) => request<void>(`/api/Marca/${id}`, {
     method: 'DELETE',
   }),
 };
 
 // MATERIAIS
 export const materiaisAPI = {
-  getAll: () => request<any[]>('/Materiais'),
-  getById: (id: string) => request<any>(`/Materiais/${id}`),
-  create: (data: any) => request<any>('/Materiais', {
+  getAll: () => request<any[]>('/Material'),
+  getById: (id: string) => request<any>(`/Material/${id}`),
+  create: (data: any) => request<any>('/Material', {
     method: 'POST',
     body: JSON.stringify(data),
   }),
-  update: (id: string, data: any) => request<any>(`/Materiais/${id}`, {
+  update: (id: string, data: any) => request<any>(`/Material/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   }),
-  delete: (id: string) => request<void>(`/Materiais/${id}`, {
+  delete: (id: string) => request<void>(`/Material/${id}`, {
     method: 'DELETE',
   }),
 };

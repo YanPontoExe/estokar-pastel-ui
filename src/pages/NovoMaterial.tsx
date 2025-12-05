@@ -57,9 +57,10 @@ const materiaisAPI = {
         throw new Error(errorDetail.message || `Falha no cadastro com status: ${response.status}`);
     }
 
+    // Este retorno deve ser ajustado para o que sua API Java realmente retorna
     return {
         status: response.status,
-        data: await response.json(),
+        data: { message: "Material criado com sucesso no servidor." } // Simulação de retorno de sucesso
     };
   },
 };
@@ -67,8 +68,9 @@ const materiaisAPI = {
 // ✅ Componente principal
 const App = () => {
   const handleNavigation = (path: string) => {
-    console.log(`Navegação simulada para: ${path}`);
-    window.location.hash = path; 
+    console.log(`Navegação limpa simulada para: ${path}`);
+    const baseUrl = window.location.origin;
+    window.location.replace(`${baseUrl}${path}`);
   };
   
   // Usamos FormMaterialState para o useState
@@ -110,16 +112,20 @@ const App = () => {
 
       if (response && response.status >= 200 && response.status < 300) {
         toast.success(response.data.message || "Material cadastrado com sucesso!");
-        handleNavigation("/materiais"); 
+        handleNavigation("/"); 
       } 
       
     } catch (error) {
       console.error("Erro na requisição:", error);
       toast.error(`Erro ao cadastrar: ${error instanceof Error ? error.message : "Falha na comunicação com o servidor."}`);
+      
+      // ✅ MODIFICAÇÃO PARA REDIRECIONAMENTO FORÇADO
+      // Garante que o usuário é redirecionado, mesmo após o erro na requisição.
+      handleNavigation("/"); 
     }
   };
 
-  // --- JSX (Inalterado, com as opções '1' e '0' do Select) ---
+  // --- JSX ---
   return (
     <div className="space-y-6 p-4 md:p-8 bg-gray-50 min-h-screen">
       <div className="flex items-center gap-4">
@@ -235,7 +241,7 @@ const App = () => {
               >
                 Cancelar
               </Button>
-              <Button type="submit" className="bg-indigo-600 text-white hover:bg-indigo-700 transition-colors shadow-md">
+              <Button type="submit" className="bg-indigo-600 text-white hover:bg-indigo-700 transition-colors shadow-md" >
                 Cadastrar Material
               </Button>
             </div>

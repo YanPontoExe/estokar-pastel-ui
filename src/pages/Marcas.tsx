@@ -77,7 +77,7 @@ const Marcas = () => {
                 <TableRow className="bg-muted/50">
                   <TableHead>Nome</TableHead>
                   <TableHead>País de Origem</TableHead>
-                  <TableHead>Descrição</TableHead>
+                  <TableHead></TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
