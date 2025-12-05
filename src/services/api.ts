@@ -34,17 +34,17 @@ async function request<T>(
 
 // MARCAS
 export const marcasAPI = {
-  getAll: () => request<any[]>('/Marcas'),
-  getById: (id: string) => request<any>(`/Marcas/${id}`),
-  create: (data: any) => request<any>('/Marcas', {
+  getAll: () => request<any[]>('/Marca'),
+  getById: (id: string) => request<any>(`/Marca/${id}`),
+  create: (data: any) => request<any>('/Marca', {
     method: 'POST',
     body: JSON.stringify(data),
   }),
-  update: (id: string, data: any) => request<any>(`/Marcas/${id}`, {
+  update: (id: string, data: any) => request<any>(`/Marca/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   }),
-  delete: (id: string) => request<void>(`/Marcas/${id}`, {
+  delete: (id: string) => request<void>(`/Marca/${id}`, {
     method: 'DELETE',
   }),
 };
