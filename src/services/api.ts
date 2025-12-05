@@ -136,17 +136,17 @@ export const saidasAPI = {
 
 // USUÁRIOS
 export const usuariosAPI = {
-  getAll: () => request<any[]>('/Usuarios'),
-  getById: (id: string) => request<any>(`/Usuarios/${id}`),
-  create: (data: any) => request<any>('/Usuarios', {
+  getAll: () => request<any[]>('/api/Usuario'),
+  getById: (id: string) => request<any>(`/api/Usuario/${id}`),
+  create: (data: any) => request<any>('/api/Usuario', {
     method: 'POST',
     body: JSON.stringify(data),
   }),
-  update: (id: string, data: any) => request<any>(`/Usuarios/${id}`, {
+  update: (id: string, data: any) => request<any>(`/api/Usuario/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   }),
-  delete: (id: string) => request<void>(`/Usuarios/${id}`, {
+  delete: (id: string) => request<void>(`/api/Usuario/${id}`, {
     method: 'DELETE',
   }),
 };

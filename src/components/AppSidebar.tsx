@@ -32,6 +32,7 @@ const menuItems = [
   { title: "Entradas", url: "/entradas", icon: ArrowDownToLine },
   { title: "Saídas", url: "/saidas", icon: ArrowUpFromLine },
   { title: "Setores", url: "/setores", icon: Building2 },
+  { title: "Usuarios", url: "/usuarios", icon: UserCircle },
 ];
 
 export function AppSidebar() {

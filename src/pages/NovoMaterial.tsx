@@ -8,90 +8,118 @@ import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import React, { useState } from "react";
 
-// 🚨 SIMULAÇÃO DE API: Definindo um mock simples de 'materiaisAPI'
-// Mantido do fix anterior
+// 🚨 IMPORTANTE: SUBSTITUA PELA URL REAL DO SEU BACKEND
+const API_URL = "http://localhost:8080/Material"; 
+
+// ⭐ Interface para o ESTADO do Componente (Select retorna string '1' ou '0')
+interface FormMaterialState {
+  id_material: string;
+  cod_fornecedor: string;
+  marca: string;
+  status: string;        // Mantido como string para o Select
+  descricao: string;
+  data_cadastro: string; 
+}
+
+// ⭐ Interface para o PAYLOAD ENVIADO ao Backend (status deve ser number INT)
+interface FormMaterialPayload {
+    id_material: string;
+    cod_fornecedor: string;
+    marca: string;
+    status: number;        // ✅ ALTERADO: O backend receberá o status como number
+    descricao: string;
+    data_cadastro: string;
+}
+
+
+// ✅ IMPLEMENTAÇÃO REAL DA API: Usando fetch
+// A função agora espera o payload com 'status' como number
 const materiaisAPI = {
-  create: (data: any) => {
-    console.log("MOCK API: Tentativa de envio de dados:", data);
-    return Promise.resolve({ 
-      status: 201, 
-      data: { message: "Material criado com sucesso (MOCK)." } 
+  create: async (data: FormMaterialPayload) => {
+    console.log("REAL API: Tentativa de envio de dados para:", API_URL, data);
+    
+    // Configuração da requisição POST
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      // 🎯 Conversão: JSON.stringify transforma o 'status: 1' em {"status": 1} (número JSON)
+      body: JSON.stringify(data), 
     });
+
+    if (!response.ok) {
+        let errorDetail = { message: `Erro no servidor: Status ${response.status}` };
+        try {
+            errorDetail = await response.json();
+        } catch (e) { }
+        
+        throw new Error(errorDetail.message || `Falha no cadastro com status: ${response.status}`);
+    }
+
+    return {
+        status: response.status,
+        data: await response.json(),
+    };
   },
 };
 
-// ⭐ Interface de Dados do Formulário (Somente os campos necessários para o Backend)
-interface FormMaterialData {
-  id_material: string;   // Recebe o 'Código' do Front
-  cod_fornecedor: string;
-  marca: string;
-  status: string;        // Recebe o 'Setor'/'Status' do Front
-  descricao: string;
-  data_cadastro: string; // Gerado automaticamente
-}
-
 // ✅ Componente principal
 const App = () => {
-  // 🧭 SIMULAÇÃO DE NAVEGAÇÃO: Função para simular a navegação
   const handleNavigation = (path: string) => {
     console.log(`Navegação simulada para: ${path}`);
     window.location.hash = path; 
   };
   
-  const [materialData, setMaterialData] = useState<FormMaterialData>({
-    // Valores Iniciais
+  // Usamos FormMaterialState para o useState
+  const [materialData, setMaterialData] = useState<FormMaterialState>({
     id_material: "",
     cod_fornecedor: "",
     marca: "",
-    status: "",
+    status: "1", // Valor inicial '1' (Ativo)
     descricao: "",
-    data_cadastro: new Date().toISOString().split('T')[0], // Define a data de hoje (YYYY-MM-DD)
+    data_cadastro: new Date().toISOString().split('T')[0],
   });
 
-  // --- Funções de Manipulação de Estado ---
-
-  // Função genérica para atualizar o estado ao mudar o valor
-  const handleChange = (name: keyof FormMaterialData, value: string) => {
+  const handleChange = (name: keyof FormMaterialState, value: string) => {
     setMaterialData((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
   
-  // Função para Select (lida com valores de string)
-  const handleSelectChange = (name: keyof FormMaterialData) => (value: string) => {
+  const handleSelectChange = (name: keyof FormMaterialState) => (value: string) => {
       handleChange(name, value);
   };
-
-  // Não precisamos mais de handleNumericInputChange, pois os campos numéricos foram removidos.
   
   // --- Função de Submissão e Requisição API ---
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 🎯 PAYLOAD FINAL: O payload é simplesmente o estado completo, pois só tem os campos do Backend
-    const payloadParaBackend = materialData;
+    // 🎯 PAYLOAD FINAL: Conversão de string para number
+    const payloadParaBackend: FormMaterialPayload = {
+      ...materialData,
+      // ✅ AÇÃO CHAVE: Converte a string "1" ou "0" para o número 1 ou 0
+      status: Number(materialData.status), 
+    };
     
-    console.log("Payload Enviado:", payloadParaBackend);
-
     try {
+      // 🔄 CHAMA A API REAL com o payload convertido
       const response = await materiaisAPI.create(payloadParaBackend);
 
       if (response && response.status >= 200 && response.status < 300) {
         toast.success(response.data.message || "Material cadastrado com sucesso!");
         handleNavigation("/materiais"); 
-      } else {
-        const errorDetail = response?.data?.message || 'Detalhes desconhecidos';
-        toast.error(`Erro ao cadastrar: Status ${response?.status || 'N/A'} - ${errorDetail}`);
-      }
+      } 
+      
     } catch (error) {
       console.error("Erro na requisição:", error);
-      toast.error("Erro ao conectar com o servidor ou ao cadastrar o material.");
+      toast.error(`Erro ao cadastrar: ${error instanceof Error ? error.message : "Falha na comunicação com o servidor."}`);
     }
   };
 
-  // --- JSX (Marcações) ---
+  // --- JSX (Inalterado, com as opções '1' e '0' do Select) ---
   return (
     <div className="space-y-6 p-4 md:p-8 bg-gray-50 min-h-screen">
       <div className="flex items-center gap-4">
@@ -158,26 +186,23 @@ const App = () => {
                 </Select>
               </div>
 
-              {/* 4. status (Setor / Status) */}
+              {/* 4. status (Status: 1=Ativo / 0=Inativo) */}
               <div className="space-y-2">
-                <Label htmlFor="status" className="font-medium text-gray-700">Setor / Status</Label>
+                <Label htmlFor="status" className="font-medium text-gray-700">Status (1=Ativo / 0=Inativo)</Label>
                 <Select required value={materialData.status} onValueChange={handleSelectChange("status")}>
                   <SelectTrigger id="status" className="border-gray-300 focus:ring-indigo-500 focus:border-indigo-500">
-                    <SelectValue placeholder="Selecione o setor/status" />
+                    <SelectValue placeholder="Selecione o status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Almoxarifado">Almoxarifado</SelectItem>
-                    <SelectItem value="Producao">Produção</SelectItem>
-                    <SelectItem value="Manutencao">Manutenção</SelectItem>
-                    <SelectItem value="Expedicao">Expedição</SelectItem>
+                    <SelectItem value="1">Ativo (1)</SelectItem>
+                    <SelectItem value="0">Inativo (0)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              {/* 5. data_cadastro (Inclusão) - Apenas para visualização ou informativo */}
+              {/* 5. data_cadastro (Inclusão) */}
                <div className="space-y-2 col-span-full lg:col-span-1">
                 <Label htmlFor="data_cadastro" className="font-medium text-gray-700">Data de Cadastro</Label>
-                {/* O valor é gerado automaticamente e exibido como ReadOnly */}
                 <Input 
                     id="data_cadastro" 
                     type="date" 
@@ -189,7 +214,7 @@ const App = () => {
 
             </div>
 
-            {/* 6. descricao (Descrição) - Campo completo na linha de baixo */}
+            {/* 6. descricao (Descrição) */}
             <div className="space-y-2">
               <Label htmlFor="descricao" className="font-medium text-gray-700">Descrição</Label>
               <Textarea

@@ -10,8 +10,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Search, Pencil, Trash2 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Search, Pencil, Trash2 } from "lucide-react";
+import { toast } from "sonner"; // 👈 Importando toast para feedback
 import { usuariosAPI } from "@/services/api";
 
 type UserWithRole = {
@@ -21,22 +21,34 @@ type UserWithRole = {
   role: string;
 };
 
+// 🧭 SIMULAÇÃO DE NAVEGAÇÃO: Função para simular a navegação
+const handleNavigation = (path: string) => {
+    console.log(`Navegação simulada para: ${path}`);
+    window.location.hash = path; 
+};
+
+
 const Usuarios = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [users, setUsers] = useState<UserWithRole[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // 1. ✅ CHAMADA GET (Listagem)
   useEffect(() => {
     fetchUsers();
   }, []);
 
+  // 2. ✅ FUNÇÃO RESPONSÁVEL PELO MÉTODO GET
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const data = await usuariosAPI.getAll();
+      // Aqui é onde o método GET é chamado, através de 'usuariosAPI.getAll()'
+      const data = await usuariosAPI.getAll(); 
       setUsers(data);
     } catch (error) {
       console.error("Erro ao carregar usuários:", error);
+      // Adicionando feedback de erro para o usuário
+      toast.error("Erro ao carregar a lista de usuários. Verifique o servidor.");
     } finally {
       setLoading(false);
     }
@@ -47,6 +59,7 @@ const Usuarios = () => {
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Funções de Role Badge e Label (Mantidas, mas não exibidas)
   const getRoleBadgeClass = (role: string) => {
     switch (role) {
       case "admin":
@@ -77,10 +90,6 @@ const Usuarios = () => {
           <h1 className="text-3xl font-bold text-foreground">Usuários</h1>
           <p className="text-muted-foreground">Gerencie usuários e permissões do sistema</p>
         </div>
-        <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
-          <Plus className="mr-2 h-4 w-4" />
-          Novo Usuário
-        </Button>
       </div>
 
       <Card className="bg-gradient-card border-border">
@@ -104,43 +113,38 @@ const Usuarios = () => {
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/50">
-                  <TableHead>Username</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Perfil</TableHead>
+                  <TableHead>Username</TableHead> 
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center py-8">
+                    <TableCell colSpan={2} className="text-center py-8">
                       <div className="flex justify-center">
+                        {/* ⏳ Ícone de Carregamento */}
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                       </div>
                     </TableCell>
                   </TableRow>
                 ) : filteredUsers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={2} className="text-center py-8 text-muted-foreground">
                       Nenhum usuário encontrado
                     </TableCell>
                   </TableRow>
                 ) : (
+                  // 3. ✅ RENDERIZAÇÃO DOS DADOS OBTIDOS PELO GET
                   filteredUsers.map((user) => (
                     <TableRow key={user.id} className="hover:bg-muted/30">
                       <TableCell className="font-medium">{user.username}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>
-                        <Badge className={getRoleBadgeClass(user.role)}>
-                          {getRoleLabel(user.role)}
-                        </Badge>
-                      </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 text-primary hover:bg-primary/10"
+                            onClick={() => handleNavigation(`/usuarios/editar/${user.id}`)}
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>
@@ -148,6 +152,7 @@ const Usuarios = () => {
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                            onClick={() => console.log(`Excluir usuário: ${user.id}`)}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
