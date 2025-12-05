@@ -1,73 +1,66 @@
-# Welcome to your Lovable project
+# EstoKar - Frontend Client
 
-## Project info
+> Este é o repositório do cliente web para a aplicação EstoKar. Ele é responsável por toda a interface do usuário (UI) e a lógica de apresentação, comunicando-se com a API para gerenciamento de dados.
 
-**URL**: https://lovable.dev/projects/00439aa5-eb61-453e-9134-e055c63dee8b
+## ✨ Visão Geral do Projeto
 
-## How can I edit this code?
+Este projeto é uma **Single Page Application (SPA)** desenvolvida em **TypeScript**. O objetivo é fornecer uma experiência de usuário fluida e responsiva para a gestão de Estoques e materiais.
 
-There are several ways of editing your application.
+### 💻 Tecnologias Chave
 
-**Use Lovable**
+* **Framework:** JSX
+* **Linguagem:** TypeScript
+* **Estilização:** Tailwind CSS
+* **Gerenciador de Pacotes:** npm
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/00439aa5-eb61-453e-9134-e055c63dee8b) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+## ⚙️ Configuração Local
 
-**Use your preferred IDE**
+Siga estes passos para configurar e executar a aplicação em seu ambiente local.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Pré-requisitos
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+* **Node.js** 
+* **npm** 
+* O Backend da aplicação deve estar em execução em `https://localhost/8080`
 
-Follow these steps:
+### Passo a Passo
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+1.  **Clone o repositório:**
+    ```bash
+    git clone https://github.com/YanPontoExe/estokar-pastel-ui
+    ```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+2.  **Acesse o diretório:**
+    ```bash
+    cd /estokar-pastel-ui
+    ```
 
-# Step 3: Install the necessary dependencies.
-npm i
+3.  **Instale as dependências:**
+    ```bash
+    npm install 
+    ```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+4.  **Configuração de Ambiente:**
+    * Crie um arquivo `.env` na raiz do projeto, baseado no `.env.example`.
+    * **Variável crucial:** Defina a URL da API do Backend:
+        ```env
+        REACT_APP_API_URL=http://localhost/8080
+        ```
 
-**Edit a file directly in GitHub**
+5.  **Inicie a Aplicação:**
+    ```bash
+    npm run dev
+    ```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+A aplicação será aberta automaticamente em seu navegador, geralmente em **`http://localhost:8081`**.
 
-**Use GitHub Codespaces**
+---
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 🤝 Comunicação com a API (Backend)
 
-## What technologies are used for this project?
+O frontend interage com o Backend através de requisições HTTP RESTful.
 
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/00439aa5-eb61-453e-9134-e055c63dee8b) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+* **URL Base da API:** `API_BASE_URL = 'http://localhost:8080'`
+* **Biblioteca HTTP:** [Ex: Axios, Fetch API]
