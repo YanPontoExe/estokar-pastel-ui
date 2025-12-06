@@ -7,25 +7,25 @@ const Dashboard = () => {
   const [stats, setStats] = useState([
     {
       title: "Total de Materiais",
-      value: "0",
+      value: "10",
       icon: Package,
       description: "Itens cadastrados",
     },
     {
       title: "Funcionários Ativos",
-      value: "0",
+      value: "10",
       icon: Users,
       description: "No sistema",
     },
     {
       title: "Entradas (Mês)",
-      value: "0",
+      value: "10",
       icon: ArrowDownToLine,
       description: "Últimos 30 dias",
     },
     {
       title: "Saídas (Mês)",
-      value: "0",
+      value: "10",
       icon: ArrowUpFromLine,
       description: "Últimos 30 dias",
     },
