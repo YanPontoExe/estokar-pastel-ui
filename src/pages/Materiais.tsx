@@ -41,6 +41,21 @@ const Materiais = () => {
     material.codigo?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  //mapeamento do delete
+  const handleDelete = async (id: number) => {
+    if (!confirm("Tem certeza que deseja excluir este material?")) return;
+
+    try {
+      await materiaisAPI.delete(id.toString());
+
+      // ⬅ atualiza a lista SEM DAR REFRESH
+      setMaterials((prev) => prev.filter((m) => m.id_material !== id));
+    } catch (error) {
+      console.error("Erro ao excluir material:", error);
+    }
+  };
+
+
   // O número de colunas é 3: Nome, Marca e Ações.
   const COL_SPAN = 3; 
 
@@ -101,7 +116,7 @@ const Materiais = () => {
                   </TableRow>
                 ) : (
                   filteredMaterials.map((material) => (
-                    <TableRow key={material.id} className="hover:bg-muted/30">
+                    <TableRow key={material.id_material} className="hover:bg-muted/30">
                       {/* Modificação 2: Manter apenas Nome e Marca */}
                       <TableCell className="font-medium">{material.descricao}</TableCell>
                       <TableCell>{material.marca || "-"}</TableCell>
@@ -120,6 +135,7 @@ const Materiais = () => {
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                            onClick={() => handleDelete(material.id_material)}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
