@@ -12,6 +12,7 @@ interface NovaSaidaProps {
   navigateTo: (path: string) => void;
 }
 
+
 // ⭐ Tipagem para o estado do formulário de saída
 interface SaidaFormData {
   id_movimentacao: string;
@@ -19,7 +20,16 @@ interface SaidaFormData {
   motivo: string;
   cod_funcionario: string;
 }
-
+const handleNavigation = (path: string) => {
+    console.log(`Navegação limpa simulada para: ${path}`);
+    
+    // Pega o domínio base (Ex: http://localhost:8081)
+    const baseUrl = window.location.origin;
+    
+    // Usa window.location.replace para ir para a URL completa do destino (Ex: http://localhost:8081/funcionarios)
+    // Isso substitui o caminho anterior, resolvendo o problema do URL com hash duplo.
+    window.location.replace(`${baseUrl}${path}`);
+  };
 // 🚨 SIMULAÇÃO DE API: Mock simples de 'saidasAPI'
 const saidasAPI = {
   create: (data: SaidaFormData) => {
@@ -29,12 +39,12 @@ const saidasAPI = {
             if (Math.random() > 0.1) { // 90% de chance de sucesso
                 resolve({ 
                     status: 201, 
-                    data: { message: "Saída registrada com sucesso (MOCK)." } 
+                    data: { message: "Saída registrada com sucesso (MOCK)." }
                 });
             } else {
                 reject({ 
                     status: 500, 
-                    data: { message: "Erro de servidor simulado." } 
+                    data: { message: "Saída registrada com sucesso." }
                 });
             }
         }, 1500);
