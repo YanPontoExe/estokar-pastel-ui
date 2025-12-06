@@ -7,63 +7,63 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import React, { useState } from "react";
+import { materiaisAPI } from "@/services/api";
+
 
 // 🚨 IMPORTANTE: SUBSTITUA PELA URL REAL DO SEU BACKEND
 const API_URL = "http://localhost:8080/Material"; 
 
 // ⭐ Interface para o ESTADO do Componente (Select retorna string '1' ou '0')
 interface FormMaterialState {
-  id_material: string;
-  cod_fornecedor: string;
-  marca: string;
-  status: string;        // Mantido como string para o Select
   descricao: string;
-  data_cadastro: string; 
+  marca: string;
+  cod_fornecedor: number;
+  status: string;
+  dataCadastro: string;
 }
 
 // ⭐ Interface para o PAYLOAD ENVIADO ao Backend (status deve ser number INT)
 interface FormMaterialPayload {
-    id_material: string;
-    cod_fornecedor: string;
-    marca: string;
-    status: number;        // ✅ ALTERADO: O backend receberá o status como number
-    descricao: string;
-    data_cadastro: string;
+  descricao: string;
+  marca: string;
+  cod_fornecedor: number;
+  status: string;
+  dataCadastro: string;
 }
 
 
-// ✅ IMPLEMENTAÇÃO REAL DA API: Usando fetch
-// A função agora espera o payload com 'status' como number
-const materiaisAPI = {
-  create: async (data: FormMaterialPayload) => {
-    console.log("REAL API: Tentativa de envio de dados para:", API_URL, data);
+// // ✅ IMPLEMENTAÇÃO REAL DA API: Usando fetch
+// // A função agora espera o payload com 'status' como number
+// const materiaisAPI = {
+//   create: async (data: FormMaterialPayload) => {
+//     console.log("REAL API: Tentativa de envio de dados para:", API_URL, data);
     
-    // Configuração da requisição POST
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      // 🎯 Conversão: JSON.stringify transforma o 'status: 1' em {"status": 1} (número JSON)
-      body: JSON.stringify(data), 
-    });
+//     // Configuração da requisição POST
+//     const response = await fetch(API_URL, {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/json',
+//       },
+//       // 🎯 Conversão: JSON.stringify transforma o 'status: 1' em {"status": 1} (número JSON)
+//       body: JSON.stringify(data), 
+//     });
 
-    if (!response.ok) {
-        let errorDetail = { message: `Erro no servidor: Status ${response.status}` };
-        try {
-            errorDetail = await response.json();
-        } catch (e) { }
+//     if (!response.ok) {
+//         let errorDetail = { message: `Erro no servidor: Status ${response.status}` };
+//         try {
+//             errorDetail = await response.json();
+//         } catch (e) { }
         
-        throw new Error(errorDetail.message || `Falha no cadastro com status: ${response.status}`);
-    }
+//         throw new Error(errorDetail.message || `Falha no cadastro com status: ${response.status}`);
+//     }
 
-    // Este retorno deve ser ajustado para o que sua API Java realmente retorna
-    return {
-        status: response.status,
-        data: { message: "Material criado com sucesso no servidor." } // Simulação de retorno de sucesso
-    };
-  },
-};
+//     // Este retorno deve ser ajustado para o que sua API Java realmente retorna
+//     return {
+//         status: response.status,
+//         data: { message: "Material criado com sucesso no servidor." } // Simulação de retorno de sucesso
+//     };
+//   },
+// };
 
 // ✅ Componente principal
 const App = () => {
@@ -74,14 +74,13 @@ const App = () => {
   };
   
   // Usamos FormMaterialState para o useState
-  const [materialData, setMaterialData] = useState<FormMaterialState>({
-    id_material: "",
-    cod_fornecedor: "",
-    marca: "",
-    status: "1", // Valor inicial '1' (Ativo)
-    descricao: "",
-    data_cadastro: new Date().toISOString().split('T')[0],
-  });
+  const [materialData, setMaterialData] = useState({
+  descricao: "",
+  marca: "",
+  cod_fornecedor: 0,
+  status: "1",
+  dataCadastro: new Date().toISOString().split("T")[0],
+});
 
   const handleChange = (name: keyof FormMaterialState, value: string) => {
     setMaterialData((prev) => ({
@@ -96,34 +95,56 @@ const App = () => {
   
   // --- Função de Submissão e Requisição API ---
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
 
-    // 🎯 PAYLOAD FINAL: Conversão de string para number
-    const payloadParaBackend: FormMaterialPayload = {
-      ...materialData,
-      // ✅ AÇÃO CHAVE: Converte a string "1" ou "0" para o número 1 ou 0
-      status: Number(materialData.status), 
-    };
+  //   // 🎯 PAYLOAD FINAL: Conversão de string para number
+  //   const payloadParaBackend: FormMaterialPayload = {
+  //     ...materialData,
+  //     // ✅ AÇÃO CHAVE: Converte a string "1" ou "0" para o número 1 ou 0
+  //     status: Number(materialData.status), 
+  //   };
     
-    try {
-      // 🔄 CHAMA A API REAL com o payload convertido
-      const response = await materiaisAPI.create(payloadParaBackend);
+  //   try {
+  //     // 🔄 CHAMA A API REAL com o payload convertido
+  //     const response = await materiaisAPI.create(payloadParaBackend);
 
-      if (response && response.status >= 200 && response.status < 300) {
-        toast.success(response.data.message || "Material cadastrado com sucesso!");
-        handleNavigation("/"); 
-      } 
+  //     if (response && response.status >= 200 && response.status < 300) {
+  //       toast.success(response.data.message || "Material cadastrado com sucesso!");
+  //       handleNavigation("/"); 
+  //     } 
       
-    } catch (error) {
-      console.error("Erro na requisição:", error);
-      toast.error(`Erro ao cadastrar: ${error instanceof Error ? error.message : "Falha na comunicação com o servidor."}`);
+  //   } catch (error) {
+  //     console.error("Erro na requisição:", error);
+  //     toast.error(`Erro ao cadastrar: ${error instanceof Error ? error.message : "Falha na comunicação com o servidor."}`);
       
-      // ✅ MODIFICAÇÃO PARA REDIRECIONAMENTO FORÇADO
-      // Garante que o usuário é redirecionado, mesmo após o erro na requisição.
-      handleNavigation("/"); 
-    }
+  //     // ✅ MODIFICAÇÃO PARA REDIRECIONAMENTO FORÇADO
+  //     // Garante que o usuário é redirecionado, mesmo após o erro na requisição.
+  //     handleNavigation("/"); 
+  //   }
+  // };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  const payload = {
+    descricao: materialData.descricao,
+    marca: materialData.marca,
+    cod_fornecedor: Number(materialData.cod_fornecedor),
+    dataCadastro: new Date().toISOString(),
+    status: Number(materialData.status),
   };
+
+  try {
+    await materiaisAPI.create(payload);
+    toast.success("Material cadastrado com sucesso!");
+    handleNavigation("/materiais");
+  } catch (error) {
+    console.error("Erro ao cadastrar material:", error);
+    toast.error("Erro ao cadastrar material.");
+  }
+};
+
 
   // --- JSX ---
   return (
@@ -151,7 +172,7 @@ const App = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               
-              {/* 1. id_material (Código) */}
+              {/* 1. id_material (Código)
               <div className="space-y-2">
                 <Label htmlFor="id_material" className="font-medium text-gray-700">Código (ID Material)</Label>
                 <Input 
@@ -162,7 +183,7 @@ const App = () => {
                   onChange={(e) => handleChange("id_material", e.target.value)}
                   className="border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
                 />
-              </div>
+              </div> */}
 
               {/* 2. cod_fornecedor (Cód. Fornecedor) */}
               <div className="space-y-2">
@@ -180,16 +201,14 @@ const App = () => {
               {/* 3. marca (Marca) */}
               <div className="space-y-2">
                 <Label htmlFor="marca" className="font-medium text-gray-700">Marca</Label>
-                <Select required value={materialData.marca} onValueChange={handleSelectChange("marca")}>
-                  <SelectTrigger id="marca" className="border-gray-300 focus:ring-indigo-500 focus:border-indigo-500">
-                    <SelectValue placeholder="Selecione a marca" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Marca-A">Marca A</SelectItem>
-                    <SelectItem value="Marca-B">Marca B</SelectItem>
-                    <SelectItem value="Marca-C">Marca C</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Input
+                  id="marca"
+                  placeholder="Digite a marca"
+                  required
+                  value={materialData.marca}
+                  onChange={(e) => handleChange("marca", e.target.value)}
+                  className="border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
+                />
               </div>
 
               {/* 4. status (Status: 1=Ativo / 0=Inativo) */}
@@ -213,7 +232,7 @@ const App = () => {
                     id="data_cadastro" 
                     type="date" 
                     readOnly 
-                    value={materialData.data_cadastro}
+                    value={materialData.dataCadastro}
                     className="border-gray-300 bg-gray-100 cursor-default"
                 />
               </div>
@@ -222,7 +241,7 @@ const App = () => {
 
             {/* 6. descricao (Descrição) */}
             <div className="space-y-2">
-              <Label htmlFor="descricao" className="font-medium text-gray-700">Descrição</Label>
+              <Label htmlFor="descricao" className="font-medium text-gray-700">Descrição do Material</Label>
               <Textarea
                 id="descricao"
                 placeholder="Informações adicionais sobre o material..."
