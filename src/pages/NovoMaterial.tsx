@@ -77,7 +77,7 @@ const App = () => {
   const [materialData, setMaterialData] = useState({
   descricao: "",
   marca: "",
-  cod_fornecedor: 0,
+  cod_fornecedor: 0, 
   status: "1",
   dataCadastro: new Date().toISOString().split("T")[0],
 });

@@ -5,41 +5,60 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import { entradasAPI } from '@/services/api';
 
-// 🚨 SIMULAÇÃO DE API: Definindo mock para Entradas
-const entradasAPI = {
-  create: (data: any) => {
-    console.log("MOCK API: Tentativa de envio de dados de entrada:", data);
-    return Promise.resolve({ 
-      status: 201, 
-      data: { message: "Registro de entrada criado com sucesso (MOCK)." } 
-    });
-  },
-};
+// // 🚨 SIMULAÇÃO DE API: Definindo mock para Entradas
+// const entradasAPI = {
+//   create: (data: any) => {
+//     console.log("MOCK API: Tentativa de envio de dados de entrada:", data);
+//     return Promise.resolve({ 
+//       status: 201, 
+//       data: { message: "Registro de entrada criado com sucesso (MOCK)." } 
+//     });
+//   },
+// };
 
 // Interface de Dados do Formulário (O id_movimentacao foi removido daqui)
 interface FormEntradaData { 
-    cod_fornecedor: string; 
+    cod_fornecedor: number;
     cod_material: string;
-    quantidade: number;
-    data_entrada: string;
+    quantidade: string;
+    dataEntrada: string;
     nota_fiscal: string;
+    cod_usuario: string;
 }
 
-// ✅ Componente principal para Cadastro de Entrada (NovaEntrada)
-// O nome do componente é App para compatibilidade com o export padrão do Canvas
-const App = ({ navigateTo }: { navigateTo: (path: string) => void }) => {
+interface FormMaterialPayload {
+    cod_fornecedor: number;
+    cod_material: string;
+    quantidade: string;
+    dataEntrada: string;
+    nota_fiscal: string;
+    cod_usuario: string;
+}
+
+// // ✅ Componente principal para Cadastro de Entrada (NovaEntrada)
+// // O nome do componente é App para compatibilidade com o export padrão do Canvas
+// const App = ({ navigateTo }: { navigateTo: (path: string) => void }) => {
     
-    // Data de entrada padrão é a data de hoje
-    const today = new Date().toISOString().split('T')[0];
+    const App = () => {
+    const handleNavigation = (path: string) => {
+        console.log(`Navegação limpa simulada para: ${path}`);
+        const baseUrl = window.location.origin;
+        window.location.replace(`${baseUrl}${path}`);
+    };
+
+    // // Data de entrada padrão é a data de hoje
+    // const today = new Date().toISOString().split('T')[0];
 
     // Inicialização do estado (id_movimentacao removido)
-    const [entradaData, setEntradaData] = useState<FormEntradaData>({ 
-        cod_fornecedor: "", 
-        cod_material: "",
-        quantidade: 1, // Padrão 1
-        data_entrada: today, 
-        nota_fiscal: "",
+    const [entradaData, setEntradaData] = useState({
+    cod_material: "",
+    quantidade: "",
+    cod_fornecedor: 0,
+    dataEntrada: new Date().toISOString().split("T")[0],
+    nota_fiscal: "",
+    cod_usuario: "",
     });
 
     // Função para lidar com a mudança de campos de texto ou numéricos
@@ -47,36 +66,58 @@ const App = ({ navigateTo }: { navigateTo: (path: string) => void }) => {
         setEntradaData((prev) => ({ ...prev, [name]: value }));
     };
 
-    // Função de Submissão e Requisição API
+    // // Função de Submissão e Requisição API
+    // const handleSubmit = async (e: React.FormEvent) => {
+    //     e.preventDefault();
+    //     try {
+    //         // Converte a quantidade para número antes de enviar, se for string
+    //         const payloadParaBackend = {
+    //             ...entradaData,
+    //             quantidade: Number(entradaData.quantidade),
+    //         };
+            
+    //         const response = await entradasAPI.create(payloadParaBackend);
+            
+    //         if (response && response.status >= 200 && response.status < 300) {
+    //             toast.success(response.data.message || "Entrada cadastrada com sucesso!");
+    //             // Usa a função de navegação fornecida pelo App principal (ex: voltar para o dashboard)
+    //             navigateTo("/"); 
+    //         } else {
+    //              toast.error(`Erro ao cadastrar entrada.`);
+    //         }
+    //     } catch (error) {
+    //         console.error("Erro na requisição da entrada:", error);
+    //         toast.error("Erro ao conectar com o servidor.");
+    //     }
+    // };
+
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        try {
-            // Converte a quantidade para número antes de enviar, se for string
-            const payloadParaBackend = {
-                ...entradaData,
-                quantidade: Number(entradaData.quantidade),
-            };
-            
-            const response = await entradasAPI.create(payloadParaBackend);
-            
-            if (response && response.status >= 200 && response.status < 300) {
-                toast.success(response.data.message || "Entrada cadastrada com sucesso!");
-                // Usa a função de navegação fornecida pelo App principal (ex: voltar para o dashboard)
-                navigateTo("/"); 
-            } else {
-                 toast.error(`Erro ao cadastrar entrada.`);
-            }
-        } catch (error) {
-            console.error("Erro na requisição da entrada:", error);
-            toast.error("Erro ao conectar com o servidor.");
-        }
+      e.preventDefault();
+    
+      const payload = {
+        cod_material: Number(entradaData.cod_material),
+        quantidade: Number(entradaData.quantidade),
+        usuario: { id_usuario: Number(entradaData.cod_usuario) }, // ← coloque o ID do usuário logado
+        cod_fornecedor: Number(entradaData.cod_fornecedor),
+        notaFiscal: entradaData.nota_fiscal,
+        dataEntrada: new Date().toISOString(),
+      };
+    
+      try {
+        await entradasAPI.create(payload);
+        toast.success("Entrada cadastrada com sucesso!");
+        handleNavigation("/entradas");
+      } catch (error) {
+        console.error("Erro ao cadastrar entrada:", error);
+        toast.error("Erro ao cadastrar entrada.");
+      }
     };
 
     // --- JSX (Marcações) ---
     return (
         <div className="space-y-6 p-4 md:p-8 bg-gray-50 min-h-screen">
             <div className="flex items-center gap-4">
-                <Button variant="ghost" size="icon" onClick={() => navigateTo("/entradas")} className="hover:bg-gray-200">
+                <Button variant="ghost" size="icon" onClick={() => handleNavigation("/entradas")} className="hover:bg-gray-200">
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div>
@@ -111,7 +152,7 @@ const App = ({ navigateTo }: { navigateTo: (path: string) => void }) => {
                                 <Label htmlFor="cod_material" className="font-medium text-gray-700">Código do Material</Label>
                                 <Input 
                                     id="cod_material" 
-                                    placeholder="Ex: M4567" 
+                                    placeholder="(Apenas números)" 
                                     required 
                                     value={entradaData.cod_material}
                                     onChange={(e) => handleChange("cod_material", e.target.value)}
@@ -132,7 +173,7 @@ const App = ({ navigateTo }: { navigateTo: (path: string) => void }) => {
                                     onChange={(e) => handleChange("quantidade", Number(e.target.value))}
                                     className="border-gray-300 focus:ring-red-500 focus:border-red-500"
                                 />
-                            </div>
+                            </div> 
 
                             {/* 4. nota_fiscal (String, required) */}
                             <div className="space-y-2 col-span-full md:col-span-1">
@@ -154,8 +195,21 @@ const App = ({ navigateTo }: { navigateTo: (path: string) => void }) => {
                                     id="data_entrada" 
                                     type="date" 
                                     readOnly 
-                                    value={entradaData.data_entrada}
+                                    value={entradaData.dataEntrada}
                                     className="border-gray-300 bg-gray-100 cursor-default"
+                                />
+                            </div>
+
+                             {/* 6. id_movimentacao (String, required) */}
+                            <div className="space-y-2 col-span-full md:col-span-1">
+                                <Label htmlFor="cod_usuario" className="font-medium text-gray-700">Id do usuário</Label>
+                                <Input 
+                                    id="cod_usuario" 
+                                    placeholder="Ex: 000123456" 
+                                    required 
+                                    value={entradaData.cod_usuario}
+                                    onChange={(e) => handleChange("cod_usuario", e.target.value)}
+                                    className="border-gray-300 focus:ring-red-500 focus:border-red-500"
                                 />
                             </div>
 
@@ -168,7 +222,7 @@ const App = ({ navigateTo }: { navigateTo: (path: string) => void }) => {
                             <Button
                                 type="button"
                                 variant="outline"
-                                onClick={() => navigateTo("/entradas")}
+                                onClick={() => handleNavigation("/entradas")}
                                 className="hover:bg-gray-100 border-gray-300 text-gray-700"
                             >
                                 Cancelar
