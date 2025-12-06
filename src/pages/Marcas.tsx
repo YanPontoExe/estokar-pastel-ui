@@ -41,6 +41,20 @@ const Marcas = () => {
     (brand.pais_origem && brand.pais_origem.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
+   //mapeamento do delete
+    const handleDelete = async (id: number) => {
+      if (!confirm("Tem certeza que deseja excluir este material?")) return;
+  
+      try {
+        await marcasAPI.delete(id.toString());
+  
+        // ⬅ atualiza a lista SEM DAR REFRESH
+        setBrands((prev) => prev.filter((m) => m.id_marca !== id));
+      } catch (error) {
+        console.error("Erro ao excluir marca:", error);
+      }
+    };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -77,7 +91,7 @@ const Marcas = () => {
                 <TableRow className="bg-muted/50">
                   <TableHead>Nome</TableHead>
                   <TableHead>País de Origem</TableHead>
-                  <TableHead></TableHead>
+                  <TableHead>Descrição</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
@@ -99,7 +113,7 @@ const Marcas = () => {
                     <TableRow key={brand.id} className="hover:bg-muted/30">
                       <TableCell className="font-medium">{brand.nome_marca}</TableCell>
                       <TableCell>{brand.pais_origem || "-"}</TableCell>
-                      <TableCell>{brand.descricao || "-"}</TableCell>
+                      <TableCell>{brand.descricao_marca || "-"}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
                           <Button
@@ -113,6 +127,7 @@ const Marcas = () => {
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 text-destructive hover:bg-destructive/10"
+                            onClick={() => handleDelete(brand.id_marca)}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>

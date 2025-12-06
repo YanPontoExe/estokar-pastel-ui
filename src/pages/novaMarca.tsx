@@ -1,89 +1,91 @@
-import React, { useState } from 'react';
-// import { useNavigate } from 'react-router-dom'; // 👈 REMOVIDO: Não é suportado no ambiente Canvas
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea"; 
+import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import React, { useState } from "react";
+import { marcasAPI } from "@/services/api";
 
-// 🚨 SIMULAÇÃO DE API: Definindo mock para Marcas
-const marcasAPI = {
-  create: (data: any) => {
-    console.log("MOCK API: Tentativa de envio de dados de marca:", data);
-    return Promise.resolve({ status: 201, data: { message: "Marca cadastrada com sucesso (MOCK)." } });
-  },
-};
+// 🚨 IMPORTANTE: SUBSTITUA PELA URL REAL DO SEU BACKEND
+    const API_URL = "http://localhost:8080/Marca"; 
 
-// Interface de Dados do Formulário
-interface FormMarcaData { 
-    nome_marca: string; 
-    pais_origem: string; 
+    // ⭐ Interface para o ESTADO do Componente (Select retorna string '1' ou '0')
+    interface FormMarcaState {
+    nome_marca: string;
+    pais_origem: string;
     descricao_marca: string;
-    status: boolean; 
-}
+    status: string;
+    dataCadastro: string;
+    }
 
-// ✅ Componente principal para Cadastro de Marcas
-const App = () => { // 👈 Renomeado para App
-    
-    // 🧭 MODIFICAÇÃO DE NAVEGAÇÃO: Implementando a função de redirecionamento limpo
-    const handleNavigation = (path: string) => {
+    // ⭐ Interface para o PAYLOAD ENVIADO ao Backend (status deve ser number INT)
+    interface FormMarcaPayload {
+    nome_marca: string;
+    pais_origem: string;
+    descricao_marca: string;
+    status: string;
+    dataCadastro: string;
+    }
+
+    // ✅ Componente principal
+    const App = () => {
+      const handleNavigation = (path: string) => {
         console.log(`Navegação limpa simulada para: ${path}`);
         const baseUrl = window.location.origin;
-        // Usa window.location.replace para ir para a URL completa do destino
         window.location.replace(`${baseUrl}${path}`);
-    };
+      };
+      
+      // Usamos FormmarcaState para o useState
+      const [marcaData, setMarcaData] = useState({
+      nome_marca: "",
+      pais_origem: "",
+      descricao_marca: "",
+      status: "1",
+      dataCadastro: new Date().toISOString().split("T")[0],
+        });
 
-    // Inicialização do estado
-    const [marcaData, setMarcaData] = useState<FormMarcaData>({ 
-        nome_marca: "", 
-        pais_origem: "",
-        descricao_marca: "",
-        status: true, // Padrão: Ativa
-    });
+      const handleChange = (name: keyof FormMarcaState, value: string) => {
+        setMarcaData((prev) => ({
+          ...prev,
+          [name]: value,
+        }));
+      };
+      
+      const handleSelectChange = (name: keyof FormMarcaState) => (value: string) => {
+          handleChange(name, value);
+      };
 
-    // Função para lidar com a mudança de campos de texto/textarea
-    const handleChange = (name: keyof FormMarcaData, value: string | boolean) => {
-        setMarcaData((prev) => ({ ...prev, [name]: value }));
-    };
-
-    // Função para lidar com a mudança de Select (que retorna string, mas pode ser boolean)
-    const handleSelectChange = (name: keyof FormMarcaData) => (value: string) => {
-        // Converte string 'true'/'false' para boolean para o campo status
-        const finalValue = name === 'status' ? (value === 'true') : value;
-        handleChange(name, finalValue as string | boolean);
-    };
-
-    // Função de Submissão e Requisição API
-    const handleSubmit = async (e: React.FormEvent) => {
+      // Função de submissão do formulário
+        const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        
+        const payload = {
+            nome_marca: marcaData.nome_marca,
+            pais_origem: marcaData.pais_origem,        // string
+            descricao_marca: marcaData.descricao_marca, // string opcional
+            status: marcaData.status === "true",        // boolean
+            dataCadastro: new Date().toISOString(),    // opcional, backend pode preencher
+        };
+        
         try {
-            // O payload é enviado exatamente com os dados do estado
-            const payloadParaBackend = marcaData;
-            
-            const response = await marcasAPI.create(payloadParaBackend);
-            
-            if (response && response.status >= 200 && response.status < 300) {
-                toast.success(response.data.message || "Marca cadastrada com sucesso!");
-                // 4. Usar a função de navegação limpa
-                handleNavigation("/"); 
-            } else {
-                 toast.error(`Erro ao cadastrar marca.`);
-            }
+            await marcasAPI.create(payload);
+            toast.success("marca cadastrado com sucesso!");
+            handleNavigation("/marcas");
         } catch (error) {
-            console.error("Erro na requisição da marca:", error);
-            toast.error("Erro ao conectar com o servidor.");
+            console.error("Erro ao cadastrar marca:", error);
+            toast.error("Erro ao cadastrar marca.");
         }
-    };
+        };
 
     // --- JSX (Marcações) ---
     return (
         <div className="space-y-6 p-4 md:p-8 bg-gray-50 min-h-screen">
             <div className="flex items-center gap-4">
                 {/* 5. Usar a função de navegação limpa */}
-                <Button variant="ghost" size="icon" onClick={() => handleNavigation("/marcas")} className="hover:bg-gray-200">
+                <Button variant="ghost" size="icon" onClick={() => handleNavigation("/api/Marca")} className="hover:bg-gray-200">
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div>
@@ -160,13 +162,25 @@ const App = () => { // 👈 Renomeado para App
                                 />
                             </div>
                         </div>
+
+                        {/* 5. dataCadastro (Inclusão) */}
+                                       <div className="space-y-2 col-span-full lg:col-span-1">
+                                        <Label htmlFor="dataCadastro" className="font-medium text-gray-700">Data de Cadastro</Label>
+                                        <Input 
+                                            id="dataCadastro" 
+                                            type="date" 
+                                            readOnly 
+                                            value={marcaData.dataCadastro}
+                                            className="border-gray-300 bg-gray-100 cursor-default"
+                                        />
+                                      </div>
                         
                         <div className="flex gap-4 justify-end pt-4 border-t border-gray-100 mt-6">
                             <Button
                                 type="button"
                                 variant="outline"
                                 // 6. Usar a função de navegação limpa
-                                onClick={() => handleNavigation("/marcas")}
+                                onClick={() => handleNavigation("/api/Marca")}
                                 className="hover:bg-gray-100 border-gray-300 text-gray-700"
                             >
                                 Cancelar
