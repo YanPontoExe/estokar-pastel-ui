@@ -22,7 +22,7 @@ const Funcionarios = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchEmployees();
+    fetchEmployees(); 
   }, []);
 
   const fetchEmployees = async () => {
@@ -38,8 +38,8 @@ const Funcionarios = () => {
   };
 
   const filteredEmployees = employees.filter((employee) =>
-    employee.nome?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    employee.cpf?.includes(searchTerm)
+    employee.nome_funcionario?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    employee.setor?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -77,9 +77,9 @@ const Funcionarios = () => {
               <TableHeader>
                 <TableRow className="bg-muted/50">
                   <TableHead>Nome</TableHead>
-                  <TableHead>CPF</TableHead>
                   <TableHead>Setor</TableHead>
                   <TableHead>Turno</TableHead>
+                  <TableHead>Data da Contratação</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
@@ -100,10 +100,10 @@ const Funcionarios = () => {
                 ) : (
                   filteredEmployees.map((employee) => (
                     <TableRow key={employee.id} className="hover:bg-muted/30">
-                      <TableCell className="font-medium">{employee.nome}</TableCell>
-                      <TableCell>{employee.cpf}</TableCell>
+                      <TableCell className="font-medium">{employee.nome_funcionario}</TableCell>
                       <TableCell>{employee.setor || "-"}</TableCell>
                       <TableCell className="capitalize">{employee.turno}</TableCell>
+                      <TableCell>{new Date(employee.data_contratacao).toLocaleDateString()}</TableCell>
                       <TableCell>
                         <Badge
                           variant={employee.status ? "default" : "secondary"}

@@ -38,8 +38,8 @@ const Saidas = () => {
   };
 
   const filteredExits = exits.filter((exit) =>
-    exit.material?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    exit.codigo?.toLowerCase().includes(searchTerm.toLowerCase())
+    String(exit.motivo).includes(searchTerm) ||
+    String(exit.cod_funcionario).includes(searchTerm)
   );
 
   return (
@@ -76,12 +76,11 @@ const Saidas = () => {
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/50">
-                  <TableHead>Data</TableHead>
-                  <TableHead>Código</TableHead>
-                  <TableHead>Material</TableHead>
-                  <TableHead className="text-right">Quantidade</TableHead>
-                  <TableHead>Usuário</TableHead>
+                  <TableHead>Codigo do Material</TableHead>
+                  <TableHead>Quantidade</TableHead>
+                  <TableHead>Código do Funcionario</TableHead>
                   <TableHead>Motivo</TableHead>
+                  <TableHead>Data de Saída</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -100,16 +99,15 @@ const Saidas = () => {
                 ) : (
                   filteredExits.map((exit) => (
                     <TableRow key={exit.id} className="hover:bg-muted/30">
-                      <TableCell>{new Date(exit.data_saida).toLocaleDateString('pt-BR')}</TableCell>
-                      <TableCell className="font-medium">{exit.codigo}</TableCell>
-                      <TableCell>{exit.material}</TableCell>
-                      <TableCell className="text-right">
-                        <Badge variant="secondary" className="bg-destructive/10 text-destructive">
+                      <TableCell className="font-medium">{exit.cod_material}</TableCell>
+                      <TableCell>
+                        <Badge className="bg-primary text-primary-foreground">
                           -{exit.quantidade}
                         </Badge>
                       </TableCell>
-                      <TableCell>{exit.usuario || "-"}</TableCell>
-                      <TableCell className="capitalize">{exit.motivo}</TableCell>
+                      <TableCell className="px-12">{exit.cod_funcionario || "-"}</TableCell>
+                      <TableCell>{exit.motivo || "-"}</TableCell>
+                      <TableCell>{new Date(exit.data_saida).toLocaleDateString('pt-BR')}</TableCell>
                     </TableRow>
                   ))
                 )}

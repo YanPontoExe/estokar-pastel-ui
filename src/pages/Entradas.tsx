@@ -38,9 +38,10 @@ const Entradas = () => {
   };
 
   const filteredEntries = entries.filter((entry) =>
-    entry.material?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    entry.codigo?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+    String(entry.cod_fornecedor).includes(searchTerm) ||
+    String(entry.quantidade).includes(searchTerm) ||
+    String(entry.cod_material).includes(searchTerm)
+);
 
   return (
     <div className="space-y-6">
@@ -76,13 +77,11 @@ const Entradas = () => {
             <Table>
               <TableHeader>
                 <TableRow className="bg-muted/50">
-                  <TableHead>Data</TableHead>
-                  <TableHead>Código</TableHead>
-                  <TableHead>Material</TableHead>
-                  <TableHead className="text-right">Quantidade</TableHead>
-                  <TableHead>Fornecedor</TableHead>
+                  <TableHead>Codigo do Material</TableHead>
+                  <TableHead>Quantidade</TableHead>
+                  <TableHead>Código do Fornecedor</TableHead>
                   <TableHead>Nota Fiscal</TableHead>
-                  <TableHead>Observação</TableHead>
+                  <TableHead>Data de Entrada</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -101,17 +100,15 @@ const Entradas = () => {
                 ) : (
                   filteredEntries.map((entry) => (
                     <TableRow key={entry.id} className="hover:bg-muted/30">
-                      <TableCell>{new Date(entry.data_entrada).toLocaleDateString('pt-BR')}</TableCell>
-                      <TableCell className="font-medium">{entry.codigo}</TableCell>
-                      <TableCell>{entry.material}</TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="font-medium">{entry.cod_material}</TableCell>
+                      <TableCell>
                         <Badge className="bg-primary text-primary-foreground">
                           +{entry.quantidade}
                         </Badge>
                       </TableCell>
-                      <TableCell>{entry.fornecedor || "-"}</TableCell>
-                      <TableCell>{entry.nota_fiscal || "-"}</TableCell>
-                      <TableCell>{entry.observacoes || "-"}</TableCell>
+                      <TableCell className="px-12">{entry.cod_fornecedor || "-"}</TableCell>
+                      <TableCell>{entry.notaFiscal || "-"}</TableCell>
+                      <TableCell>{new Date(entry.dataEntrada).toLocaleDateString('pt-BR')}</TableCell>
                     </TableRow>
                   ))
                 )}

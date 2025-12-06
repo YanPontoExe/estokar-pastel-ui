@@ -68,68 +68,68 @@ export const materiaisAPI = {
 
 // FUNCIONÁRIOS
 export const funcionariosAPI = {
-  getAll: () => request<any[]>('/Funcionarios'),
-  getById: (id: string) => request<any>(`/Funcionarios/${id}`),
-  create: (data: any) => request<any>('/Funcionarios', {
+  getAll: () => request<any[]>('/Funcionario'),
+  getById: (id: string) => request<any>(`/Funcionario/${id}`),
+  create: (data: any) => request<any>('/Funcionario', {
     method: 'POST',
     body: JSON.stringify(data),
   }),
-  update: (id: string, data: any) => request<any>(`/Funcionarios/${id}`, {
+  update: (id: string, data: any) => request<any>(`/Funcionario/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   }),
-  delete: (id: string) => request<void>(`/Funcionarios/${id}`, {
+  delete: (id: string) => request<void>(`/Funcionario/${id}`, {
     method: 'DELETE',
   }),
 };
 
 // SETORES
 export const setoresAPI = {
-  getAll: () => request<any[]>('/Setores'),
-  getById: (id: string) => request<any>(`/Setores/${id}`),
-  create: (data: any) => request<any>('/Setores', {
+  getAll: () => request<any[]>('/Setor'),
+  getById: (id: string) => request<any>(`/Setor/${id}`),
+  create: (data: any) => request<any>('/Setor', {
     method: 'POST',
     body: JSON.stringify(data),
   }),
-  update: (id: string, data: any) => request<any>(`/Setores/${id}`, {
+  update: (id: string, data: any) => request<any>(`/Setor/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   }),
-  delete: (id: string) => request<void>(`/Setores/${id}`, {
+  delete: (id: string) => request<void>(`/Setor/${id}`, {
     method: 'DELETE',
   }),
 };
 
 // ENTRADAS
 export const entradasAPI = {
-  getAll: () => request<any[]>('/Entradas'),
-  getById: (id: string) => request<any>(`/Entradas/${id}`),
-  create: (data: any) => request<any>('/Entradas', {
+  getAll: () => request<any[]>('/Entrada'),
+  getById: (id: string) => request<any>(`/Entrada/${id}`),
+  create: (data: any) => request<any>('/Entrada', {
     method: 'POST',
     body: JSON.stringify(data),
   }),
-  update: (id: string, data: any) => request<any>(`/Entradas/${id}`, {
+  update: (id: string, data: any) => request<any>(`/Entrada/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   }),
-  delete: (id: string) => request<void>(`/Entradas/${id}`, {
+  delete: (id: string) => request<void>(`/Entrada/${id}`, {
     method: 'DELETE',
   }),
 };
 
 // SAÍDAS
 export const saidasAPI = {
-  getAll: () => request<any[]>('/Saidas'),
-  getById: (id: string) => request<any>(`/Saidas/${id}`),
-  create: (data: any) => request<any>('/Saidas', {
+  getAll: () => request<any[]>('/Saida'),
+  getById: (id: string) => request<any>(`/Saida/${id}`),
+  create: (data: any) => request<any>('/Saida', {
     method: 'POST',
     body: JSON.stringify(data),
   }),
-  update: (id: string, data: any) => request<any>(`/Saidas/${id}`, {
+  update: (id: string, data: any) => request<any>(`/Saida/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
   }),
-  delete: (id: string) => request<void>(`/Saidas/${id}`, {
+  delete: (id: string) => request<void>(`/Saida/${id}`, {
     method: 'DELETE',
   }),
 };
