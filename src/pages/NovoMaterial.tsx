@@ -251,6 +251,14 @@ const App = () => {
               />
             </div>
 
+             <div className="space-y-2">
+              <Label htmlFor="qtd" className="font-medium text-gray-700">Quantidade do Material</Label>
+              <Textarea
+                placeholder="Informações adicionais sobre o material..."
+                className="min-h-[8px] border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
+              />
+            </div>
+
             <div className="flex gap-4 justify-end pt-4">
               <Button
                 type="button"
