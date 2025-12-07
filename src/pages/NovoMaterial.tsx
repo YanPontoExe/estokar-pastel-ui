@@ -31,40 +31,6 @@ interface FormMaterialPayload {
   dataCadastro: string;
 }
 
-
-// // ✅ IMPLEMENTAÇÃO REAL DA API: Usando fetch
-// // A função agora espera o payload com 'status' como number
-// const materiaisAPI = {
-//   create: async (data: FormMaterialPayload) => {
-//     console.log("REAL API: Tentativa de envio de dados para:", API_URL, data);
-    
-//     // Configuração da requisição POST
-//     const response = await fetch(API_URL, {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/json',
-//       },
-//       // 🎯 Conversão: JSON.stringify transforma o 'status: 1' em {"status": 1} (número JSON)
-//       body: JSON.stringify(data), 
-//     });
-
-//     if (!response.ok) {
-//         let errorDetail = { message: `Erro no servidor: Status ${response.status}` };
-//         try {
-//             errorDetail = await response.json();
-//         } catch (e) { }
-        
-//         throw new Error(errorDetail.message || `Falha no cadastro com status: ${response.status}`);
-//     }
-
-//     // Este retorno deve ser ajustado para o que sua API Java realmente retorna
-//     return {
-//         status: response.status,
-//         data: { message: "Material criado com sucesso no servidor." } // Simulação de retorno de sucesso
-//     };
-//   },
-// };
-
 // ✅ Componente principal
 const App = () => {
   const handleNavigation = (path: string) => {
@@ -92,37 +58,6 @@ const App = () => {
   const handleSelectChange = (name: keyof FormMaterialState) => (value: string) => {
       handleChange(name, value);
   };
-  
-  // --- Função de Submissão e Requisição API ---
-
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-
-  //   // 🎯 PAYLOAD FINAL: Conversão de string para number
-  //   const payloadParaBackend: FormMaterialPayload = {
-  //     ...materialData,
-  //     // ✅ AÇÃO CHAVE: Converte a string "1" ou "0" para o número 1 ou 0
-  //     status: Number(materialData.status), 
-  //   };
-    
-  //   try {
-  //     // 🔄 CHAMA A API REAL com o payload convertido
-  //     const response = await materiaisAPI.create(payloadParaBackend);
-
-  //     if (response && response.status >= 200 && response.status < 300) {
-  //       toast.success(response.data.message || "Material cadastrado com sucesso!");
-  //       handleNavigation("/"); 
-  //     } 
-      
-  //   } catch (error) {
-  //     console.error("Erro na requisição:", error);
-  //     toast.error(`Erro ao cadastrar: ${error instanceof Error ? error.message : "Falha na comunicação com o servidor."}`);
-      
-  //     // ✅ MODIFICAÇÃO PARA REDIRECIONAMENTO FORÇADO
-  //     // Garante que o usuário é redirecionado, mesmo após o erro na requisição.
-  //     handleNavigation("/"); 
-  //   }
-  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
@@ -171,19 +106,6 @@ const App = () => {
         <CardContent className="p-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              
-              {/* 1. id_material (Código)
-              <div className="space-y-2">
-                <Label htmlFor="id_material" className="font-medium text-gray-700">Código (ID Material)</Label>
-                <Input 
-                  id="id_material" 
-                  placeholder="EX: MAT-001" 
-                  required 
-                  value={materialData.id_material}
-                  onChange={(e) => handleChange("id_material", e.target.value)}
-                  className="border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
-                />
-              </div> */}
 
               {/* 2. cod_fornecedor (Cód. Fornecedor) */}
               <div className="space-y-2">

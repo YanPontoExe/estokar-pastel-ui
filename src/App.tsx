@@ -20,6 +20,7 @@ import Entradas from "./pages/Entradas";
 import Saidas from "./pages/Saidas";
 import Setores from "./pages/Setores";
 import NotFound from "./pages/NotFound";
+import Relatorios from "@/pages/Relatorios";
 
 // Componentes de Formulários (verifique se "novaMarca" é minúsculo ou maiúsculo)
 import NovaMarca from "./pages/novaMarca"; // Presumindo que o nome do arquivo seja "NovaMarca.tsx"
@@ -84,6 +85,8 @@ const AppRoutes = () => {
         element={<ProtectedRoute><Layout><NovoSetor navigateTo={navigateTo} /></Layout></ProtectedRoute>} 
       />
       
+      <Route path="/relatorios" element={<ProtectedRoute><Layout><Relatorios /></Layout></ProtectedRoute>} />
+
       {/* Rota de Not Found (Catch-all) */}
       <Route path="*" element={<NotFound />} />
     </Routes>

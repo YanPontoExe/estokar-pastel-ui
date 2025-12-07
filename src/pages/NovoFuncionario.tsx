@@ -8,97 +8,78 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import React, { useState } from "react";
-
-// 🚨 SIMULAÇÃO DE API: Definindo um mock simples de 'funcionariosAPI'
-const funcionariosAPI = {
-  create: (data: any) => {
-    console.log("MOCK API: Tentativa de envio de dados de funcionário:", data);
-    return Promise.resolve({ 
-      status: 201, 
-      data: { message: "Funcionário cadastrado com sucesso (MOCK)." } 
-    });
-  },
-};
+import { funcionariosAPI } from "@/services/api";
 
 // ⭐ Interface de Dados do Formulário (O campo id_funcionario foi removido)
-interface FormFuncionarioData {
-  status: string;
-  data_contratacao: string; // Gerado automaticamente
-  turno: string;
-  setor: string;
-  nome_funcionario: string;
-}
+  interface FormFuncionarioState {
+    status: string
+    data_contratacao: string; // Gerado automaticamente
+    turno: string;
+    setor: string;
+    nome_funcionario: string;
+  }
 
-// ✅ Componente principal para Cadastro de Funcionários
-const App = () => {
-  
-  // 🧭 MODIFICAÇÃO CHAVE APLICADA: Usa window.location.replace para navegação limpa
-  const handleNavigation = (path: string) => {
-    console.log(`Navegação limpa simulada para: ${path}`);
+  interface FormFuncionarioPayload {
+    status: string;
+    data_contratacao: string; // Gerado automaticamente
+    turno: string;
+    setor: string;
+    nome_funcionario: string;
+  }
+
+  const App = () => {
+    const handleNavigation = (path: string) => {
+      console.log(`Navegação limpa simulada para: ${path}`);
+      const baseUrl = window.location.origin;
+      window.location.replace(`${baseUrl}${path}`);
+    };
     
-    // Pega o domínio base (Ex: http://localhost:8081)
-    const baseUrl = window.location.origin;
-    
-    // Usa window.location.replace para ir para a URL completa do destino (Ex: http://localhost:8081/funcionarios)
-    // Isso substitui o caminho anterior, resolvendo o problema do URL com hash duplo.
-    window.location.replace(`${baseUrl}${path}`);
-  };
-  
-  const [funcionarioData, setFuncionarioData] = useState<FormFuncionarioData>({
-    // Valores Iniciais (id_funcionario removido daqui)
+    // Usamos FormFuncionarioState para o useState
+    const [funcionarioData, setFuncionarioData] = useState({
     status: "",
+    data_contratacao: new Date().toISOString().split("T")[0],
     turno: "",
     setor: "",
     nome_funcionario: "",
-    // Data de contratação é a data de hoje por padrão
-    data_contratacao: new Date().toISOString().split('T')[0], 
   });
-
-  // --- Funções de Manipulação de Estado ---
-
-  // Função genérica para atualizar o estado ao mudar o valor
-  const handleChange = (name: keyof FormFuncionarioData, value: string) => {
-    setFuncionarioData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
   
-  // Função para Select (lida com valores de string)
-  const handleSelectChange = (name: keyof FormFuncionarioData) => (value: string) => {
-      handleChange(name, value);
-  };
-  
-  // --- Função de Submissão e Requisição API ---
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // 🎯 PAYLOAD FINAL: O payload é simplesmente o estado completo
-    const payloadParaBackend = funcionarioData;
+    const handleChange = (name: keyof FormFuncionarioState, value: string) => {
+      setFuncionarioData  ((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    };
     
-    console.log("Payload Enviado:", payloadParaBackend);
+    const handleSelectChange = (name: keyof FormFuncionarioState) => (value: string) => {
+        handleChange(name, value);
+    };
+  
+    const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+    
+      const payload = {
+        status: Number(funcionarioData.status),
+        data_contratacao: new Date().toISOString(),
+        turno: funcionarioData.turno,
+        setor: funcionarioData.setor,
+        nome_funcionario: funcionarioData.nome_funcionario,
+      };
+    
+      try {
+        await funcionariosAPI.create(payload);
+        toast.success("Funcionário cadastrado com sucesso!");
+        handleNavigation("/funcionarios");
 
-    try {
-      const response = await funcionariosAPI.create(payloadParaBackend);
-
-      if (response && response.status >= 200 && response.status < 300) {
-        toast.success(response.data.message || "Funcionário cadastrado com sucesso!");
-        handleNavigation("/"); // Redirecionamento simulado
-      } else {
-        const errorDetail = response?.data?.message || 'Detalhes desconhecidos';
-        toast.error(`Erro ao cadastrar: Status ${response?.status || 'N/A'} - ${errorDetail}`);
-        // Redireciona, mesmo que haja erro, para sair da tela de cadastro
-        handleNavigation("/");
+      setTimeout(() => {
+          handleNavigation("/funcionarios");
+        }, 1200); 
+        
+      } catch (error) {
+        console.error("Erro ao cadastrar funcionario:", error);
+        toast.error("Erro ao cadastrar funcionario.");
       }
-    } catch (error) {
-      console.error("Erro na requisição:", error);
-      toast.error("Erro ao conectar com o servidor ou ao cadastrar o funcionário.");
-      
-      // ✅ Redirecionamento forçado em caso de erro de comunicação
-      handleNavigation("/funcionarios"); 
-    }
-  };
+    };
+
 
   // --- JSX (Marcações) ---
   return (
@@ -180,10 +161,10 @@ const App = () => {
                     <SelectValue placeholder="Status atual" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Ativo">Ativo</SelectItem>
-                    <SelectItem value="Ferias">Férias</SelectItem>
-                    <SelectItem value="Licenca">Licença</SelectItem>
-                    <SelectItem value="Desligado">Desligado</SelectItem>
+                    <SelectItem value="1">Ativo</SelectItem>
+                    <SelectItem value="2">Férias</SelectItem>
+                    <SelectItem value="3">Licença</SelectItem>
+                    <SelectItem value="4">Desligado</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

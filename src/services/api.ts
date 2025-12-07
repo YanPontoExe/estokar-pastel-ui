@@ -30,7 +30,10 @@ async function request<T>(
   }
 }
 
-
+  //relatório de movimentações
+  export const relatorioAPI = {
+  getAll: () => request<any[]>("/Movimentacao/relatorio"),
+  };
 
 // MARCAS
 export const marcasAPI = {
