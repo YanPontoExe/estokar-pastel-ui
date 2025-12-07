@@ -20,6 +20,7 @@ interface FormMaterialState {
   cod_fornecedor: number;
   status: string;
   dataCadastro: string;
+  quantidade: number;
 }
 
 // ⭐ Interface para o PAYLOAD ENVIADO ao Backend (status deve ser number INT)
@@ -29,6 +30,7 @@ interface FormMaterialPayload {
   cod_fornecedor: number;
   status: string;
   dataCadastro: string;
+  quantidade: number;
 }
 
 // ✅ Componente principal
@@ -46,6 +48,7 @@ const App = () => {
   cod_fornecedor: 0, 
   status: "1",
   dataCadastro: new Date().toISOString().split("T")[0],
+  quantidade: 0,
 });
 
   const handleChange = (name: keyof FormMaterialState, value: string) => {
@@ -68,6 +71,7 @@ const App = () => {
     cod_fornecedor: Number(materialData.cod_fornecedor),
     dataCadastro: new Date().toISOString(),
     status: Number(materialData.status),
+    quantidade: Number(materialData.quantidade),
   };
 
   try {
@@ -172,14 +176,20 @@ const App = () => {
                 onChange={(e) => handleChange("descricao", e.target.value)}
               />
             </div>
-
-             <div className="space-y-2">
-              <Label htmlFor="qtd" className="font-medium text-gray-700">Quantidade do Material</Label>
-              <Textarea
-                placeholder="Informações adicionais sobre o material..."
-                className="min-h-[8px] border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
-              />
-            </div>
+            
+              {/* 7. quantidade (Quantidade) */}
+              <div className="space-y-2">
+                <Label htmlFor="quantidade" className="font-medium text-gray-700">Quantidade</Label>
+                <Input 
+                  id="quantidade" 
+                  type="number"
+                  placeholder="Digite a quantidade" 
+                  required 
+                  value={materialData.quantidade}
+                  onChange={(e) => handleChange("quantidade", e.target.value)}
+                  className="border-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
 
             <div className="flex gap-4 justify-end pt-4">
               <Button

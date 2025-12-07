@@ -96,6 +96,7 @@ const Materiais = () => {
                   {/* Modificação 1: Manter apenas Nome, Marca e Ações */}
                   <TableHead>Nome</TableHead>
                   <TableHead>Marca</TableHead>
+                  <TableHead>Quantidade</TableHead>
                   <TableHead className="text-right">Ações</TableHead> 
                 </TableRow>
               </TableHeader>
@@ -120,6 +121,7 @@ const Materiais = () => {
                       {/* Modificação 2: Manter apenas Nome e Marca */}
                       <TableCell className="font-medium">{material.descricao}</TableCell>
                       <TableCell>{material.marca || "-"}</TableCell>
+                      <TableCell>{material.quantidade || "-"}</TableCell>
                       
                       {/* Manter a coluna de Ações */}
                       <TableCell className="text-right">
