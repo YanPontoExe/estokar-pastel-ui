@@ -10,6 +10,7 @@ interface RelatorioItem {
   quantidade: number;
   nome_material: string;
   usuario: string | null;
+  tipo_movimentacao: string;
 }
 
 const Relatorios = () => {
@@ -50,22 +51,24 @@ const Relatorios = () => {
                 <th className="border p-2">Material</th>
                 <th className="border p-2">Quantidade</th>
                 <th className="border p-2">Usuário</th>
+                <th className="border p-2">Tipo da Movimentação</th>
               </tr>
             </thead>
             <tbody>
               {relatorio.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="text-center p-4 text-gray-500">
+                  <td colSpan={5} className="text-center p-4 text-gray-500">
                     Nenhum registro encontrado
                   </td>
                 </tr>
               )}
               {relatorio.map((item) => (
                 <tr key={item.id_movimentacao}>
-                  <td className="border p-2">{item.id_movimentacao}</td>
-                  <td className="border p-2">{item.nome_material}</td>
-                  <td className="border p-2">{item.quantidade}</td>
-                  <td className="border p-2">{item.usuario || "-"}</td>
+                  <td className="text-center border p-2">{item.id_movimentacao}</td>
+                  <td className="text-center border p-2">{item.nome_material}</td>
+                  <td className="text-center border p-2">{item.quantidade}</td>
+                  <td className="text-center border p-2">{item.usuario || "-"}</td>
+                  <td className="text-center border p-2">{item.tipo_movimentacao}</td>
                 </tr>
               ))}
             </tbody>
