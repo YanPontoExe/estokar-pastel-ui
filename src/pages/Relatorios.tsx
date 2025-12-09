@@ -4,8 +4,9 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { relatorioAPI } from "@/services/api";
 import { toast } from "sonner";
+import { Search } from "lucide-react"; // Importando ícone de busca
 
-interface RelatorioItem {
+export interface RelatorioItem {
   id_movimentacao: number;
   quantidade: number;
   nome_material: string;
@@ -14,30 +15,71 @@ interface RelatorioItem {
 }
 
 const Relatorios = () => {
+  const [filterIdMaterial, setFilterIdMaterial] = useState<string>("");
   const [relatorio, setRelatorio] = useState<RelatorioItem[]>([]);
   const [loading, setLoading] = useState(false);
 
   const handleFetchRelatorio = async () => {
-    setLoading(true);
-    try {
-      const response = await relatorioAPI.getAll();
-      setRelatorio(response); // se quiser filtrar por idMaterial, use idMaterial ? `/relatorio?idMaterial=${idMaterial}` : '/relatorio'
-      toast.success("Relatório carregado com sucesso!");
-    } catch (error) {
-      console.error("Erro ao buscar relatório:", error);
-      toast.error("Falha ao carregar o relatório.");
-    } finally {
-      setLoading(false);
-    }
-  };
+        setLoading(true);
+        try {
+            let url = "/Movimentacao/relatorio"; // URL base
+
+            // Converte e valida o filtro
+            const id = parseInt(filterIdMaterial);
+            const isFilterActive = filterIdMaterial.trim() !== "";
+
+            if (isFilterActive) {
+                if (isNaN(id)) {
+                    // Caso o usuário tente filtrar com texto
+                    toast.error("O filtro deve ser um número inteiro (ID do Material).");
+                    setLoading(false);
+                    return;
+                }
+                // Monta a URL com o query parameter: /Movimentacao/relatorio?idMaterial=X
+                url = `/Movimentacao/relatorio?idMaterial=${id}`;
+            }
+            
+            // 🚨 CHAMADA DE API: Usando a URL dinâmica
+            // O seu relatorioAPI.getAll PRECISA aceitar esta URL completa
+            const response = await relatorioAPI.getAll(url); 
+            
+            setRelatorio(response);
+            toast.success("Relatório carregado com sucesso!");
+        } catch (error) {
+            console.error("Erro ao buscar relatório:", error);
+            toast.error("Falha ao carregar o relatório.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+  // Função para tratar o ENTER no campo de input
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+            handleFetchRelatorio();
+        }
+    };
 
   return (
     <div className="p-4 md:p-8 space-y-6">
       <h1 className="text-3xl font-bold">Relatórios de Movimentação</h1>
 
-      <Button onClick={handleFetchRelatorio} disabled={loading}>
-        {loading ? "Carregando..." : "Gerar Relatório"}
-      </Button>
+      {/* 🆕 BARRA DE FILTRO */}
+            <div className="flex items-center space-x-2">
+                <Input
+                    type="text"
+                    placeholder="Filtrar por ID do Material (Ex: 1)"
+                    value={filterIdMaterial}
+                    onChange={(e) => setFilterIdMaterial(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    className="w-full max-w-sm"
+                />
+                <Button onClick={handleFetchRelatorio} disabled={loading} className="flex items-center">
+                    <Search className="h-4 w-4 mr-2" />
+                    {loading ? "Carregando..." : "Gerar Relatório"}
+                </Button>
+            </div>
+            {/* 🆕 FIM DA BARRA DE FILTRO */}
 
       <Card className="bg-white shadow-xl border border-gray-200 rounded-lg mt-4">
         <CardHeader>

@@ -1,3 +1,5 @@
+import { RelatorioItem } from "@/pages/Relatorios"; // Supondo que você exportou a interface'
+
 // API Client para comunicação com Spring Boot
 const API_BASE_URL = 'http://localhost:8080';
 
@@ -30,10 +32,12 @@ async function request<T>(
   }
 }
 
-  //relatório de movimentações
+// RELATÓRIOS
   export const relatorioAPI = {
-  getAll: () => request<any[]>("/Movimentacao/relatorio"),
-  };
+    getAll: (url: string = "/Movimentacao/relatorio") => request<RelatorioItem[]>(
+        url
+    ),
+};
 
 // MARCAS
 export const marcasAPI = {
